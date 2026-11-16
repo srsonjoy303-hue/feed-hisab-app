@@ -367,4 +367,2489 @@ function updateTexts() {
   document.querySelectorAll('.tab').forEach((tab, i) => { if (tKeys[i]) tab.textContent = tKeys[i]; });
 
   $('s1Title').textContent = t('s1');
+  $('s2Title').textContent = t('s2');
+  $('s3Title').textContent = t('s3');
+  $('s4Title').textContent = t('s4');
+  $('s5Title').textContent = t('s5');
+  document.querySelectorAll('.unit-wt').forEach(el => el.textContent = t('unitWt'));
+  $('uTaka').textContent = t('unitTaka');
+  $('hLatest').textContent = t('hLatest');
+  $('hStockTable').textContent = t('hStockTable');
+
+  $('hEntryTitle').textContent = t('hEntryTitle');
+  $('lKind').textContent = t('lKind');
+  $('optIn').textContent = t('optIn');
+  $('optOut').textContent = t('optOut');
+  $('lProd').textContent = t('lProd');
+  $('lBags').textContent = t('lBags');
+  $('lKgs').textContent = t('lKgs');
+  $('lCust').textContent = t('lCust');
+  $('lPrice').textContent = t('lPrice');
+  $('lPaid').textContent = t('lPaid');
+  $('lDate').textContent = t('lDate');
+  $('lNote').textContent = t('lNote');
+  $('note').placeholder = t('phNote');
+  $('saveEntry').textContent = t('saveEntryBtn');
+
+  $('hNewProd').textContent = t('hNewProd');
+  $('lPName').textContent = t('lPName'); $('pName').placeholder = t('phPName');
+  $('lPCode').textContent = t('lPCode'); $('pCode').placeholder = t('phPCode');
+  $('lPWeight').textContent = t('lPWeight');
+  $('lPBags').textContent = t('lPBags');
+  $('lPKgs').textContent = t('lPKgs');
+  $('addProduct').textContent = t('addProdBtn');
+  $('hProdList').textContent = t('hProdList');
+
+  $('hNewCust').textContent = t('hNewCust');
+  $('lCName').textContent = t('lCName'); $('cName').placeholder = t('phCName');
+  $('lCPhone').textContent = t('lCPhone'); $('cPhone').placeholder = t('phCPhone');
+  $('lCAddr').textContent = t('lCAddr'); $('cAddress').placeholder = t('phCAddr');
+  $('addCustomer').textContent = t('addCustBtn');
+  $('lSearch').textContent = t('lSearch'); $('searchCustomer').placeholder = t('phSearch');
+  $('hCustList').textContent = t('hCustList');
+
+  $('backToCustomers').textContent = t('backCust');
+  $('hNewCustTx').textContent = t('hNewCustTx');
+  $('lCTxType').textContent = t('lCTxType');
+  $('optDueSale').textContent = t('optDueSale');
+  $('optCashColl').textContent = t('optCashColl');
+  $('lCTxNote').textContent = t('lCTxNote'); $('cTxNote').placeholder = t('phCTxNote');
+  $('lCTxAmt').textContent = t('lCTxAmt');
+  $('lCTxPaid').textContent = t('lCTxPaid');
+  $('saveCustomerTx').textContent = t('saveCustTxBtn');
+  $('hCustHist').textContent = t('hCustHist');
+  $('printCustBtn').textContent = t('printCustBtn');
+
+  $('hAllRec').textContent = t('hAllRec');
+  $('csvBtn').textContent = t('csvBtn');
+  $('hBackup').textContent = t('hBackup');
+  $('pBackupDesc').textContent = t('pBackupDesc');
+  $('exportJsonBtn').textContent = t('exportJsonBtn');
+  $('importJsonBtn').textContent = t('importJsonBtn');
+
+  $('hRepTitle').textContent = t('hRepTitle');
+  $('lRepDate').textContent = t('lRepDate');
+  $('makeReport').textContent = t('makeRepBtn');
+  $('printBtn').textContent = t('printBtn');
+  $('footerText').textContent = t('footer');
+}
+
+function renderSelect() {
+  let old = $('prodSelect').value;
+  $('prodSelect').innerHTML = db.products.map(p => `<option value="${p.id}">${esc(p.name)} (${esc(p.code)}) — ${bn(p.weight)} ${currentLang === 'en' ? 'Kg/Bag' : 'কেজি/বস্তা'}</option>`).join('');
+  if (old && product(old)) $('prodSelect').value = old;
+
+  let cOld = $('txCustomer').value;
+  let noCustText = currentLang === 'en' ? "-- Without Customer / Cash Sale --" : "-- কাস্টমার ছাড়া / নগদ বিক্রি --";
+  let noNumText = currentLang === 'en' ? "No phone" : "নম্বর নেই";
+  $('txCustomer').innerHTML = `<option value="">${noCustText}</option>` + db.customers.map(c => `<option value="${c.id}">[${esc(c.serial)}] ${esc(c.name)} (${esc(c.phone || noNumText)})</option>`).join('');
+  if (cOld) $('txCustomer').value = cOld;
+  updateCalc();
+}
+
+function updateCalc() {
+  let p = product($('prodSelect').value);
+  let prefix = currentLang === 'en' ? 'Total Quantity:' : 'মোট পরিমাণ:';
+  let unitText = currentLang === 'en' ? 'Kg' : 'কেজি';
+  let promptText = currentLang === 'en' ? 'Please add a product first' : 'আগে একটি পণ্য যোগ করুন';
+  $('calc').textContent = p ? `${prefix} ${bn(totalQty($('bags').value, $('kgs').value, p))} ${unitText}` : promptText;
+}
+
+function toggleSaleSection() {
+  $('saleSection').style.display = $('kind').value === 'out' ? 'block' : 'none';
+}
+
+function toggleCTxFields() {
+  let isCash = $('cTxType').value === 'cash_collection';
+  $('cTxAmtWrap').style.display = isCash ? 'none' : 'block';
+  if (isCash) $('cTxAmount').value = '0';
+}
+
+$('bags').oninput = $('kgs').oninput = updateCalc;
+$('prodSelect').onchange = updateCalc;
+$('kind').onchange = toggleSaleSection;
+$('cTxType').onchange = toggleCTxFields;
+
+$('addProduct').onclick = () => {
+  let name = $('pName').value.trim(), code = $('pCode').value.trim() || `F${String(db.products.length + 1).padStart(3, '0')}`, weight = Number($('pWeight').value), b = Number($('pBags').value) || 0, k = Number($('pKgs').value) || 0;
+  if (!name || weight <= 0 || b < 0 || k < 0) return alert(currentLang === 'en' ? 'Please enter product name, correct weight and stock.' : 'পণ্যের নাম, সঠিক বস্তার ওজন ও মজুদ দিন।');
+  let p = { id: uuid(), name, code, weight };
+  db.products.push(p);
+  let initText = currentLang === 'en' ? "Initial Stock" : "প্রাথমিক মজুদ";
+  if (b * weight + k > 0) db.tx.push({ id: uuid(), serial: `IN-${String(db.next++).padStart(5, '0')}`, pid: p.id, kind: 'in', bags: b, kgs: k, totalKg: b * weight + k, date: dateLocal(), note: initText });
+  $('pName').value = $('pCode').value = ''; $('pBags').value = '0'; $('pKgs').value = '0';
+  save();
+  alert(currentLang === 'en' ? 'Product saved successfully.' : 'পণ্য সংরক্ষণ হয়েছে।');
+};
+
+$('saveEntry').onclick = () => {
+  let kind = $('kind').value, p = product($('prodSelect').value), b = Number($('bags').value) || 0, k = Number($('kgs').value) || 0, total = p ? totalQty(b, k, p) : 0;
+  if (!p) return alert(currentLang === 'en' ? 'Please add a product first.' : 'আগে পণ্য যোগ করুন।');
+  if (b < 0 || k < 0 || total <= 0) return alert(currentLang === 'en' ? 'Please enter correct quantity.' : 'সঠিক পরিমাণ দিন।');
+
+  if (kind === 'out' && total > stockKg(p) + 0.0001) {
+    let stockMsg = currentLang === 'en' ? `Insufficient stock. Current stock: ${qtyText(stockKg(p), p)}` : `পর্যাপ্ত মজুদ নেই। বর্তমান মজুদ ${qtyText(stockKg(p), p)}`;
+    return alert(stockMsg);
+  }
+
+  let dt = $('entryDate').value || dateLocal();
+  let serial = `${kind === 'in' ? 'IN' : 'OUT'}-${String(db.next++).padStart(5, '0')}`;
+  db.tx.push({ id: uuid(), serial, pid: p.id, kind, bags: b, kgs: k, totalKg: total, date: dt, note: $('note').value.trim() });
+
+  if (kind === 'out') {
+    let cid = $('txCustomer').value;
+    let tPrice = Number($('totalPrice').value) || 0;
+    let paid = Number($('paidAmount').value) || 0;
+    if (cid && (tPrice > 0 || paid > 0)) {
+      let descText = currentLang === 'en' ? `Sale: ${p.name} (${bn(b)} Bags + ${bn(k)} Kg)` : `বিক্রি: ${p.name} (${bn(b)} বস্তা + ${bn(k)} কেজি)`;
+      db.customerTx.push({ id: uuid(), cid, date: dt, desc: descText, amount: tPrice, paid });
+    }
+  }
+
+  $('bags').value = '0'; $('kgs').value = '0'; $('note').value = ''; $('totalPrice').value = '0'; $('paidAmount').value = '0'; $('entryDate').value = dateLocal();
+  save();
+  alert(currentLang === 'en' ? 'Transaction saved successfully.' : 'লেনদেন সফলভাবে সংরক্ষণ করা হয়েছে।');
+};
+
+let activeCustomerId = null;
+$('addCustomer').onclick = () => {
+  let name = $('cName').value.trim(), phone = $('cPhone').value.trim(), address = $('cAddress').value.trim();
+  if (!name) return alert(currentLang === 'en' ? 'Please enter customer name.' : 'কাস্টমারের নাম দিন।');
+  let serial = `C-${String(db.cNext++).padStart(3, '0')}`;
+  db.customers.push({ id: uuid(), serial, name, phone, address });
+  $('cName').value = $('cPhone').value = $('cAddress').value = '';
+  save();
+  alert(currentLang === 'en' ? `Customer added. Serial: ${serial}` : `কাস্টমার যোগ করা হয়েছে। সিরিয়াল নম্বর: ${serial}`);
+};
+
+function getCustomerBalance(cid) {
+  return db.customerTx.filter(t => t.cid === cid).reduce((a, t) => a + (t.amount - t.paid), 0);
+}
+
+function renderCustomers() {
+  $('customerListView').classList.remove('hide');
+  $('customerDetailView').classList.add('hide');
+
+  let searchTxt = $('searchCustomer').value.toLowerCase().trim();
+  let filteredCustomers = db.customers.filter(c => {
+    return (c.serial || '').toLowerCase().includes(searchTxt) ||
+      (c.name || '').toLowerCase().includes(searchTxt) ||
+      (c.phone || '').includes(searchTxt);
+  });
+
+  let thSerial = currentLang === 'en' ? 'Serial' : 'সিরিয়াল';
+  let thName = currentLang === 'en' ? 'Name' : 'নাম';
+  let thPhone = currentLang === 'en' ? 'Mobile' : 'মোবাইল';
+  let thAddr = currentLang === 'en' ? 'Address' : 'ঠিকানা';
+  let thStatus = currentLang === 'en' ? 'Current Status' : 'বর্তমান অবস্থা';
+
+  $('customerTable').innerHTML = filteredCustomers.length ? `<table><thead><tr><th>${thSerial}</th><th>${thName}</th><th>${thPhone}</th><th>${thAddr}</th><th>${thStatus}</th></tr></thead><tbody>${filteredCustomers.map(c => {
+    let bal = getCustomerBalance(c.id);
+    let dueText = currentLang === 'en' ? `Due: ৳${bn(bal)}` : `বাকি: ৳${bn(bal)}`;
+    let advText = currentLang === 'en' ? `Advance: ৳${bn(Math.abs(bal))}` : `অগ্রিম / অতিরিক্ত: ৳${bn(Math.abs(bal))}`;
+    let paidText = currentLang === 'en' ? `Paid (0)` : `পরিশোধিত (০)`;
+    let balText = bal > 0 ? `<span style="color:var(--red)">${dueText}</span>` : bal < 0 ? `<span style="color:var(--blue)">${advText}</span>` : `<span class="muted">${paidText}</span>`;
+    return `<tr style="cursor:pointer" onclick="openCustomer('${c.id}')"><td><span class="serial">${esc(c.serial)}</span></td><td><span class="cname-bold">${esc(c.name)}</span></td><td><b>${esc(c.phone || '—')}</b></td><td>${esc(c.address || '—')}</td><td><b>${balText}</b></td></tr>`;
+  }).join('')}</tbody></table>` : `<div class="empty">${t('noCust')}</div>`;
+}
+
+$('searchCustomer').oninput = renderCustomers;
+
+window.openCustomer = id => {
+  activeCustomerId = id;
+  let c = db.customers.find(x => x.id === id);
+  if (!c) { activeCustomerId = null; renderCustomers(); return; }
+  $('customerListView').classList.add('hide');
+  $('customerDetailView').classList.remove('hide');
+
+  let txs = db.customerTx.filter(t => t.cid === id).sort((a, b) => a.date.localeCompare(b.date));
+  let runningBal = 0;
+
+  let phoneLbl = currentLang === 'en' ? 'Mobile' : 'মোবাইল';
+  let addrLbl = currentLang === 'en' ? 'Address' : 'ঠিকানা';
+  let noneText = currentLang === 'en' ? 'None' : 'নেই';
+  let editBtnText = currentLang === 'en' ? 'Edit Info' : 'তথ্য এডিট';
+  let delBtnText = currentLang === 'en' ? 'Delete' : 'ডিলিট';
+
+  $('customerProfileCard').innerHTML = `<div class="serial" style="margin-bottom:4px">Serial: ${esc(c.serial)}</div><h2 style="margin:0 0 6px 0;font-size:21px;font-weight:800" class="cname-bold">${esc(c.name)}</h2><div class="muted">${phoneLbl}: <b style="color:var(--text)">${esc(c.phone || noneText)}</b> • ${addrLbl}: ${esc(c.address || noneText)}</div><div class="no-print" style="margin-top:12px;display:flex;gap:8px;"><button class="btn-light" onclick="editCustomer('${c.id}')">${editBtnText}</button><button class="btn-red" onclick="deleteCustomer('${c.id}')">${delBtnText}</button></div>`;
+
+  let thDate = currentLang === 'en' ? 'Date' : 'তারিখ';
+  let thDesc = currentLang === 'en' ? 'Description' : 'বিবরণ';
+  let thAmt = currentLang === 'en' ? 'Price' : 'মূল্য';
+  let thPaid = currentLang === 'en' ? 'Paid' : 'জমা';
+  let thRem = currentLang === 'en' ? 'Balance' : 'অবশিষ্ট বাকি';
+  let thAct = currentLang === 'en' ? 'Action' : 'কাজ';
+  let delTxLbl = currentLang === 'en' ? 'Del' : 'মুছুন';
+
+  $('customerTxTable').innerHTML = txs.length ? `<table><thead><tr><th>${thDate}</th><th>${thDesc}</th><th>${thAmt}</th><th>${thPaid}</th><th>${thRem}</th><th class="no-print">${thAct}</th></tr></thead><tbody>${txs.map(tx => {
+    runningBal += (tx.amount - tx.paid);
+    let rDue = currentLang === 'en' ? `৳${bn(runningBal)} Due` : `৳${bn(runningBal)} বাকি`;
+    let rAdv = currentLang === 'en' ? `৳${bn(Math.abs(runningBal))} Adv` : `৳${bn(Math.abs(runningBal))} অগ্রিম`;
+    let rZero = `৳${bn(0)}`;
+    return `<tr><td>${esc(tx.date.replace('T', ' '))}</td><td>${esc(tx.desc)}</td><td>৳${bn(tx.amount)}</td><td>৳${bn(tx.paid)}</td><td><b>${runningBal > 0 ? `<span style="color:var(--red)">${rDue}</span>` : runningBal < 0 ? `<span style="color:var(--blue)">${rAdv}</span>` : rZero}</b></td><td class="no-print"><button class="btn-red btn-sm" onclick="deleteCustomerTx('${tx.id}')">${delTxLbl}</button></td></tr>`;
+  }).join('')}</tbody></table>` : `<div class="empty">${t('noTx')}</div>`;
+};
+
+window.deleteCustomerTx = txId => {
+  let msg = currentLang === 'en' ? 'Delete this customer transaction?' : 'এই লেনদেনটি মুছে ফেলতে চান?';
+  if (!confirm(msg)) return;
+  db.customerTx = db.customerTx.filter(t => t.id !== txId);
+  save();
+};
+
+window.editCustomer = id => {
+  let c = db.customers.find(x => x.id === id);
+  if (!c) return;
+  let name = prompt(currentLang === 'en' ? 'Customer Name' : 'কাস্টমারের নাম', c.name); if (name === null) return;
+  let phone = prompt(currentLang === 'en' ? 'Mobile Number' : 'মোবাইল নম্বর', c.phone || ''); if (phone === null) return;
+  let address = prompt(currentLang === 'en' ? 'Address' : 'ঠিকানা', c.address || ''); if (address === null) return;
+  if (!name.trim()) return alert(currentLang === 'en' ? 'Customer name is required.' : 'কাস্টমারের নাম আবশ্যক।');
+  c.name = name.trim(); c.phone = phone.trim(); c.address = address.trim();
+  save();
+  alert(currentLang === 'en' ? 'Customer info updated successfully.' : 'কাস্টমারের তথ্য আপডেট করা হয়েছে।');
+};
+
+window.deleteCustomer = id => {
+  let confirmMsg = currentLang === 'en' ? 'Do you want to delete this customer and all ledger history?' : 'এই কাস্টমার এবং তার সমস্ত খাতা চিরতরে মুছে ফেলতে চান?';
+  if (!confirm(confirmMsg)) return;
+  db.customers = db.customers.filter(c => c.id !== id);
+  db.customerTx = db.customerTx.filter(t => t.cid !== id);
+  activeCustomerId = null;
+  save();
+  alert(currentLang === 'en' ? 'Customer deleted.' : 'কাস্টমার ডিলিট করা হয়েছে।');
+};
+
+$('backToCustomers').onclick = () => { activeCustomerId = null; renderCustomers(); };
+$('printCustBtn').onclick = () => window.print();
+
+$('saveCustomerTx').onclick = () => {
+  if (!activeCustomerId) return;
+  let defaultDesc = currentLang === 'en' ? ($('cTxType').value === 'due_sale' ? 'Due Purchase' : 'Cash Payment') : ($('cTxType').value === 'due_sale' ? 'বাকিতে মাল ক্রয়' : 'নগদ টাকা জমা');
+  let desc = $('cTxNote').value.trim() || defaultDesc;
+  let amount = $('cTxType').value === 'cash_collection' ? 0 : (Number($('cTxAmount').value) || 0);
+  let paid = Number($('cTxPaid').value) || 0;
+  if (amount <= 0 && paid <= 0) return alert(currentLang === 'en' ? 'Please enter correct amount or payment.' : 'সঠিক পরিমাণ বা জমা দিন।');
+
+  db.customerTx.push({ id: uuid(), cid: activeCustomerId, date: dateLocal(), desc, amount, paid });
+  $('cTxNote').value = ''; $('cTxAmount').value = '0'; $('cTxPaid').value = '0';
+  save();
+  alert(currentLang === 'en' ? 'Transaction saved.' : 'লেনদেন সংরক্ষিত হয়েছে।');
+};
+
+function renderHome() {
+  let today = day(dateLocal()), tx = db.tx.filter(t => day(t.date) === today);
+  let ins = tx.filter(t => t.kind === 'in').reduce((a, t) => a + t.totalKg, 0);
+  let outs = tx.filter(t => t.kind === 'out').reduce((a, t) => a + t.totalKg, 0);
+  let total = db.products.reduce((a, p) => a + stockKg(p), 0);
+
+  let totalDue = 0, totalAdvance = 0, advCustomerCount = 0;
+  db.customers.forEach(c => {
+    let b = getCustomerBalance(c.id);
+    if (b > 0) totalDue += b;
+    else if (b < 0) { totalAdvance += Math.abs(b); advCustomerCount++; }
+  });
+
+  let unitKg = currentLang === 'en' ? ' Kg' : ' কেজি';
+  let custCountText = currentLang === 'en' ? `${bn(advCustomerCount)} customers` : `${bn(advCustomerCount)} জন কাস্টমার`;
+
+  $('sStock').textContent = bn(total) + unitKg;
+  $('sIn').textContent = bn(ins) + unitKg;
+  $('sOut').textContent = bn(outs) + unitKg;
+  $('sDue').textContent = `৳${bn(totalDue)}`;
+  $('sAdv').textContent = `৳${bn(totalAdvance)}`;
+  $('sAdvCount').textContent = custCountText;
+
+  let latest = [...tx].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
+  $('latest').innerHTML = latest.length ? latest.map(txItem => {
+    let typeName = txItem.kind === 'in' ? (currentLang === 'en' ? 'Input' : 'ইনপুট') : (currentLang === 'en' ? 'Sale' : 'বিক্রি');
+    return `<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b class="serial">${esc(txItem.serial)}</b><div>${esc(product(txItem.pid)?.name || (currentLang === 'en' ? 'Product' : 'পণ্য'))}</div><small class="muted">${esc(txItem.date.replace('T', ' '))}</small></div><div style="text-align:right"><span class="pill ${txItem.kind}">${typeName}</span><b style="display:block">${bn(txItem.totalKg)}${unitKg}</b></div></div>`;
+  }).join('') : `<div class="empty">${t('noRecordToday')}</div>`;
+
+  let thCode = currentLang === 'en' ? 'Code' : 'কোড';
+  let thProd = currentLang === 'en' ? 'Product' : 'পণ্য';
+  let thStock = currentLang === 'en' ? 'Stock' : 'মজুদ';
+
+  $('stockTable').innerHTML = db.products.length ? `<table><thead><tr><th>${thCode}</th><th>${thProd}</th><th>${thStock}</th></tr></thead><tbody>${db.products.map(p => `<tr><td>${esc(p.code)}</td><td>${esc(p.name)}<small class="muted" style="display:block">${bn(p.weight)} ${currentLang === 'en' ? 'Kg/Bag' : 'কেজি/বস্তা'}</small></td><td><b>${qtyText(stockKg(p), p)}</b></td></tr>`).join('')}</tbody></table>` : `<div class="empty">${t('noProd')}</div>`;
+}
+
+function renderProducts() {
+  let editBtnTxt = currentLang === 'en' ? 'Edit' : 'এডিট';
+  let delBtnTxt = currentLang === 'en' ? 'Delete' : 'ডিলিট';
+  $('productList').innerHTML = db.products.length ? db.products.map(p => `<div class="card"><div class="row"><div><b class="cname-bold">${esc(p.name)}</b><div class="muted">${esc(p.code)} • ${bn(p.weight)} ${currentLang === 'en' ? 'Kg/Bag' : 'কেজি/বস্তা'}</div><b style="color:var(--green)">${qtyText(stockKg(p), p)}</b></div><div style="display:flex;gap:6px;flex:0 0 auto;"><button class="btn-light" onclick="editProduct('${p.id}')">${editBtnTxt}</button><button class="btn-red" onclick="deleteProduct('${p.id}')">${delBtnTxt}</button></div></div></div>`).join('') : `<div class="card empty">${t('noProd')}</div>`;
+}
+
+window.editProduct = id => {
+  let p = product(id); if (!p) return;
+  let name = prompt(currentLang === 'en' ? 'Product Name' : 'পণ্যের নাম', p.name); if (name === null) return;
+  let code = prompt(currentLang === 'en' ? 'Product Code' : 'পণ্যের কোড', p.code); if (code === null) return;
+  let wInput = prompt(currentLang === 'en' ? 'Kg per Bag' : 'প্রতি বস্তার ওজন (কেজি)', p.weight); if (wInput === null) return;
+  let w = Number(wInput);
+  if (!name.trim() || !code.trim() || !Number.isFinite(w) || w <= 0) return alert(currentLang === 'en' ? 'Invalid information.' : 'তথ্য সঠিক নয়।');
+  p.name = name.trim(); p.code = code.trim(); p.weight = w;
+  save();
+  alert(currentLang === 'en' ? 'Product info updated.' : 'পণ্যের তথ্য আপডেট করা হয়েছে।');
+};
+
+window.deleteProduct = id => {
+  let confirmMsg = currentLang === 'en' ? 'Do you want to delete this product?' : 'এই পণ্যটি ডিলিট করতে চান?';
+  if (!confirm(confirmMsg)) return;
+  db.products = db.products.filter(p => p.id !== id);
+  save();
+};
+
+function renderRecords() {
+  let arr = [...db.tx].sort((a, b) => b.date.localeCompare(a.date));
+  let thSer = currentLang === 'en' ? 'Serial' : 'সিরিয়াল';
+  let thDT = currentLang === 'en' ? 'Date/Time' : 'তারিখ/সময়';
+  let thP = currentLang === 'en' ? 'Product' : 'পণ্য';
+  let thT = currentLang === 'en' ? 'Type' : 'ধরন';
+  let thQ = currentLang === 'en' ? 'Quantity' : 'পরিমাণ';
+  let thAct = currentLang === 'en' ? 'Action' : 'কাজ';
+  let unitKg = currentLang === 'en' ? ' Kg' : ' কেজি';
+  let bagText = currentLang === 'en' ? ' Bags + ' : ' বস্তা + ';
+
+  $('recordTable').innerHTML = arr.length ? `<table><thead><tr><th>${thSer}</th><th>${thDT}</th><th>${thP}</th><th>${thT}</th><th>${thQ}</th><th>${thAct}</th></tr></thead><tbody>${arr.map(txItem => {
+    let p = product(txItem.pid);
+    let typeName = txItem.kind === 'in' ? (currentLang === 'en' ? 'Input' : 'ইনপুট') : (currentLang === 'en' ? 'Sale' : 'বিক্রি');
+    let delBtn = currentLang === 'en' ? 'Delete' : 'মুছুন';
+    return `<tr><td><b>${esc(txItem.serial)}</b></td><td>${esc(txItem.date.replace('T', ' '))}</td><td>${esc(p?.name || '—')}</td><td><span class="pill ${txItem.kind}">${typeName}</span></td><td>${bn(txItem.bags)}${bagText}${bn(txItem.kgs)}${unitKg}<br>${bn(txItem.totalKg)}${unitKg}</td><td><button class="btn-red btn-sm" onclick="deleteTx('${txItem.id}')">${delBtn}</button></td></tr>`;
+  }).join('')}</tbody></table>` : `<div class="empty">${t('noRec')}</div>`;
+}
+
+window.deleteTx = id => {
+  let confirmMsg = currentLang === 'en' ? 'Delete this record?' : 'এই রেকর্ড মুছবেন?';
+  if (!confirm(confirmMsg)) return;
+  db.tx = db.tx.filter(x => x.id !== id);
+  save();
+};
+
+function renderReport() {
+  let d = $('reportDate').value || day(dateLocal()); $('reportDate').value = d;
+  let tx = db.tx.filter(t => day(t.date) === d);
+  let ins = tx.filter(t => t.kind === 'in').reduce((a, t) => a + t.totalKg, 0);
+  let outs = tx.filter(t => t.kind === 'out').reduce((a, t) => a + t.totalKg, 0);
+
+  let totalDue = 0, totalAdvance = 0;
+  db.customers.forEach(c => {
+    let b = getCustomerBalance(c.id);
+    if (b > 0) totalDue += b;
+    else if (b < 0) totalAdvance += Math.abs(b);
+  });
+
+  let unitKg = currentLang === 'en' ? ' Kg' : ' কেজি';
+  let r1 = currentLang === 'en' ? 'Total Input Today' : 'আজ মোট ইনপুট';
+  let r2 = currentLang === 'en' ? 'Total Sales Today' : 'আজ মোট বিক্রি';
+  let r3 = currentLang === 'en' ? 'Total Customer Due' : 'বর্তমান মোট কাস্টমার বাকি';
+  let r4 = currentLang === 'en' ? 'Total Advance Deposit' : 'বর্তমান মোট অগ্রিম জমা';
+  let r5 = currentLang === 'en' ? `${d} — Product-wise Night Stock` : `${d} — পণ্যভিত্তিক রাতের মজুদ`;
+  let thP = currentLang === 'en' ? 'Product' : 'পণ্য';
+  let thIn = currentLang === 'en' ? "Today's Input" : 'দিনের ইনপুট';
+  let thOut = currentLang === 'en' ? "Today's Sales" : 'দিনের বিক্রি';
+  let thStk = currentLang === 'en' ? 'Current Stock' : 'বর্তমান মজুদ';
+
+  $('reportResult').innerHTML = `
+    <div class="grid">
+      <div class="stat"><small>${r1}</small><strong>${bn(ins)}${unitKg}</strong></div>
+      <div class="stat"><small>${r2}</small><strong>${bn(outs)}${unitKg}</strong></div>
+      <div class="stat"><small>${r3}</small><strong style="color:var(--red)">৳${bn(totalDue)}</strong></div>
+      <div class="stat"><small>${r4}</small><strong style="color:var(--blue)">৳${bn(totalAdvance)}</strong></div>
+    </div>
+    <h2>${r5}</h2>
+    <div class="card tablewrap">
+      <table>
+        <thead><tr><th>${thP}</th><th>${thIn}</th><th>${thOut}</th><th>${thStk}</th></tr></thead>
+        <tbody>${db.products.map(p => {
+          let a = tx.filter(t => t.pid === p.id && t.kind === 'in').reduce((s, t) => s + t.totalKg, 0);
+          let b = tx.filter(t => t.pid === p.id && t.kind === 'out').reduce((s, t) => s + t.totalKg, 0);
+          return `<tr><td>${esc(p.name)}<small class="muted" style="display:block">${esc(p.code)}</small></td><td>${qtyText(a, p)}</td><td>${qtyText(b, p)}</td><td><b>${qtyText(stockKg(p), p)}</b></td></tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+}
+$('makeReport').onclick = renderReport;
+$('printBtn').onclick = () => window.print();
+
+$('csvBtn').onclick = () => {
+  let rows = [['Serial', 'DateTime', 'Product', 'Code', 'Type', 'Bags', 'ExtraKg', 'TotalKg', 'Note'], ...db.tx.map(t => { let p = product(t.pid); return [t.serial, t.date, p?.name || '', p?.code || '', t.kind, t.bags, t.kgs, t.totalKg, t.note || '']; })];
+  let csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
+  saveFileOut(`feed-stock-${day(dateLocal())}.csv`, csv, 'text/csv;charset=utf-8');
+};
+
+$('exportJsonBtn').onclick = () => {
+  saveFileOut(`feed-backup-${day(dateLocal())}.json`, JSON.stringify(db, null, 2), 'application/json');
+};
+
+$('importJsonBtn').onclick = () => $('importFile').click();
+$('importFile').onchange = e => {
+  let file = e.target.files[0];
+  if (!file) return;
+  let reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      let data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data.products) || !Array.isArray(data.tx)) throw new Error('Invalid');
+      let msg = currentLang === 'en' ? 'Restore backup? Current data will be replaced.' : 'ব্যাকআপ রিস্টোর করবেন? বর্তমান ডাটা পরিবর্তন হয়ে ব্যাকআপের ডাটা বসে যাবে।';
+      if (!confirm(msg)) return;
+      db = {
+        products: data.products || [],
+        tx: data.tx || [],
+        customers: data.customers || [],
+        customerTx: data.customerTx || [],
+        next: data.next || 1,
+        cNext: data.cNext || (data.customers ? data.customers.length + 1 : 1),
+        version: currentAppVersion
+      };
+      save();
+      alert(currentLang === 'en' ? 'Backup restored successfully!' : 'ব্যাকআপ সফলভাবে রিস্টোর হয়েছে!');
+    } catch (err) {
+      alert(currentLang === 'en' ? 'Invalid backup file.' : 'সঠিক ব্যাকআপ ফাইল নয়।');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+};
+
+function renderAll() {
+  updateTexts();
+  renderSelect();
+  toggleSaleSection();
+  toggleCTxFields();
+  renderHome();
+  renderProducts();
+  renderRecords();
+  if (activeCustomerId) openCustomer(activeCustomerId);
+  else renderCustomers();
+}
+
+$('entryDate').value = dateLocal();
+$('reportDate').value = day(dateLocal());
+renderAll();
+</script>
+</body>
+</html> html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14532d">
+<title>ফিড স্টক ও বাকির হিসাব</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 108 108'%3E%3Crect width='108' height='108' fill='%23285D43'/%3E%3Cpath fill='%23E2EDC5' transform='translate(54,54) scale(0.78) translate(-54,-54)' d='M52,79L52,52C32,54 22,40 25,27C43,25 56,35 56,49C59,31 70,24 86,25C88,43 75,55 59,54L59,79Z'/%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%E0%A6%AB%E0%A6%BF%E0%A6%A1%20%E0%A6%B8%E0%A7%8D%E0%A6%9F%E0%A6%95%20%E0%A6%93%20%E0%A6%AC%E0%A6%BE%E0%A6%95%E0%A6%BF%E0%A6%B0%20%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22short_name%22%3A%22%E0%A6%AB%E0%A6%BF%E0%A6%A1%20%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f3f6f3%22%2C%22theme_color%22%3A%22%2314532d%22%7D">
+<style>
+:root{--green:#14532d;--green2:#166534;--bg:#f3f6f3;--card:#fff;--text:#17231b;--muted:#647067;--line:#e2e9e3;--red:#b42318;--blue:#175cd3}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif}
+header{background:linear-gradient(135deg,#14532d,#15803d);color:#fff;padding:16px;position:sticky;top:0;z-index:5;box-shadow:0 2px 10px #0002;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:19px;margin:0 0 2px}
+header p{margin:0;font-size:11px;opacity:.85}
+.lang-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.wrap{max-width:900px;margin:auto;padding:14px 12px 90px}
+.tabs{display:flex;gap:7px;overflow:auto;margin:0 0 14px;padding-bottom:2px}
+.tab{border:1px solid var(--line);background:#fff;border-radius:22px;padding:9px 14px;white-space:nowrap;font-weight:650;color:#334;cursor:pointer}
+.tab.active{background:var(--green);color:white;border-color:var(--green)}
+.panel{display:none}.panel.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat,.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:0 2px 8px #17351d08}
+.stat small{color:var(--muted);display:block;font-size:12px}
+.stat strong{font-size:22px;display:block;margin-top:5px}
+.stat span{font-size:11px;color:var(--muted)}
+h2{font-size:17px;margin:18px 2px 10px}
+.card{margin-bottom:12px}
+.row{display:flex;gap:10px;align-items:center}
+.row>*{flex:1;min-width:0}
+.field{margin:10px 0}
+.field label{display:block;font-size:12px;font-weight:650;margin:0 0 5px;color:#344238}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid #ccd7ce;border-radius:10px;background:white;font:inherit;font-size:14px;color:var(--text)}
+input:focus,select:focus{outline:2px solid #86c99a;border-color:var(--green)}
+button{border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:700;background:var(--green);color:#fff;cursor:pointer}
+.btn-light{background:#edf4ee;color:var(--green)}
+.btn-red{background:#fff0ee;color:var(--red)}
+.btn-blue{background:#eef4ff;color:var(--blue)}
+.btn-sm{padding:6px 10px;font-size:12px;border-radius:8px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions button{flex:1}
+.muted{color:var(--muted);font-size:12px}
+.tablewrap{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:520px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+th{color:#59665c;font-size:11px;background:#f8faf8}
+.pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.in{background:#e7f6ec;color:#16713a}
+.out{background:#fff0e8;color:#b54708}
+.empty{text-align:center;padding:22px;color:var(--muted);font-size:13px}
+.notice{padding:10px 12px;border-radius:10px;background:#fff8e6;color:#7a5200;font-size:12px;margin:10px 0}
+.serial{font-weight:800;color:var(--green)}
+.cname-bold{font-weight:800;font-size:15px;color:#0f2918}
+.hide{display:none!important}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.sectionhead h2{margin:18px 2px 10px}
+.footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:9px 14px calc(9px + env(safe-area-inset-bottom));text-align:center;color:var(--muted);font-size:11px}
+@media(min-width:650px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.wrap{padding-top:20px}.stat strong{font-size:25px}}
+@media print{
+  header,.tabs,.footer,.no-print,button{display:none!important}
+  .panel{display:none!important}
+  .panel.active{display:block!important}
+  .wrap{padding:0}
+  .card,.stat{box-shadow:none;break-inside:avoid}
+  body{background:white}
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1 id="tTitle">🐓 ফিড স্টক ও বাকির হিসাব</h1>
+    <p id="tSub">স্টক • বিক্রি • কাস্টমার বাকির খাতা</p>
+  </div>
+  <button class="lang-btn" id="langToggleBtn">English</button>
+</header>
+
+<div class="wrap">
+<nav class="tabs no-print">
+  <button class="tab active" data-tab="home" id="tabHome">ড্যাশবোর্ড</button>
+  <button class="tab" data-tab="entry" id="tabEntry">ইনপুট / বিক্রি</button>
+  <button class="tab" data-tab="products" id="tabProd">পণ্য</button>
+  <button class="tab" data-tab="customers" id="tabCust">বাকির খাতা</button>
+  <button class="tab" data-tab="records" id="tabRec">রেকর্ড</button>
+  <button class="tab" data-tab="report" id="tabRep">রাতের হিসাব</button>
+</nav>
+
+<section id="home" class="panel active">
+  <div class="grid">
+    <div class="stat"><small id="s1Title">বর্তমান মোট মজুদ</small><strong id="sStock">০</strong><span class="unit-wt">বস্তা + কেজি</span></div>
+    <div class="stat"><small id="s2Title">আজকের ইনপুট</small><strong id="sIn">০</strong><span class="unit-wt">বস্তা + কেজি</span></div>
+    <div class="stat"><small id="s3Title">আজকের বিক্রি</small><strong id="sOut">০</strong><span class="unit-wt">বস্তা + কেজি</span></div>
+    <div class="stat"><small id="s4Title">মোট কাস্টমার বাকি</small><strong id="sDue" style="color:var(--red)">৳০</strong><span id="uTaka">টাকা</span></div>
+    <div class="stat"><small id="s5Title">মোট অগ্রিম / অতিরিক্ত জমা</small><strong id="sAdv" style="color:var(--blue)">৳০</strong><span id="sAdvCount">০ জন কাস্টমার</span></div>
+  </div>
+  <h2 id="hLatest">আজকের সর্বশেষ রেকর্ড</h2>
+  <div class="card" id="latest"></div>
+  <h2 id="hStockTable">পণ্যভিত্তিক বর্তমান মজুদ</h2>
+  <div class="card tablewrap" id="stockTable"></div>
+</section>
+
+<section id="entry" class="panel">
+  <div class="card">
+    <h2 style="margin-top:0" id="hEntryTitle">নতুন ইনপুট বা পণ্য বিক্রি</h2>
+    <div class="field"><label id="lKind">লেনদেনের ধরন</label>
+      <select id="kind">
+        <option value="in" id="optIn">পণ্য ইনপুট (দোকানে এসেছে)</option>
+        <option value="out" id="optOut">পণ্য বিক্রি (দোকান থেকে গেছে)</option>
+      </select>
+    </div>
+    <div class="field"><label id="lProd">পণ্য নির্বাচন</label><select id="prodSelect"></select></div>
+    <div class="row">
+      <div class="field"><label id="lBags">বস্তার সংখ্যা</label><input id="bags" type="number" min="0" step="1" value="0"></div>
+      <div class="field"><label id="lKgs">অতিরিক্ত কেজি</label><input id="kgs" type="number" min="0" step="0.01" value="0"></div>
+    </div>
+
+    <div id="saleSection" style="display:none;border-top:1px dashed var(--line);margin-top:12px;padding-top:12px;">
+      <div class="field"><label id="lCust">বিক্রির কাস্টমার (বাকির খাতার জন্য)</label><select id="txCustomer"><option value="">-- কাস্টমার ছাড়া / নগদ বিক্রি --</option></select></div>
+      <div class="row">
+        <div class="field"><label id="lPrice">মোট বিক্রয় মূল্য (টাকা)</label><input id="totalPrice" type="number" min="0" value="0"></div>
+        <div class="field"><label id="lPaid">নগদ প্রাপ্তি / জমা (টাকা)</label><input id="paidAmount" type="number" min="0" value="0"></div>
+      </div>
+    </div>
+
+    <div class="field"><label id="lDate">তারিখ ও সময়</label><input id="entryDate" type="datetime-local"></div>
+    <div class="field"><label id="lNote">বিবরণ / নোট (ঐচ্ছিক)</label><input id="note" placeholder="যেমন: চালান নম্বর বা মন্তব্য"></div>
+    <div class="notice" id="calc">মোট পরিমাণ: ০ কেজি</div>
+    <button id="saveEntry" style="width:100%">লেনদেন সংরক্ষণ করুন</button>
+  </div>
+</section>
+
+<section id="products" class="panel">
+  <div class="card">
+    <h2 style="margin-top:0" id="hNewProd">নতুন পণ্য যোগ করুন</h2>
+    <div class="field"><label id="lPName">পণ্যের নাম</label><input id="pName" placeholder="যেমন: ব্রয়লার স্টার্টার"></div>
+    <div class="row">
+      <div class="field"><label id="lPCode">পণ্যের কোড</label><input id="pCode" placeholder="যেমন: F001"></div>
+      <div class="field"><label id="lPWeight">প্রতি বস্তায় কেজি</label><input id="pWeight" type="number" min="0.01" step="0.01" value="50"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label id="lPBags">প্রাথমিক মজুদ (বস্তা)</label><input id="pBags" type="number" min="0" step="1" value="0"></div>
+      <div class="field"><label id="lPKgs">প্রাথমিক অতিরিক্ত কেজি</label><input id="pKgs" type="number" min="0" step="0.01" value="0"></div>
+    </div>
+    <button id="addProduct" style="width:100%">পণ্য সংরক্ষণ</button>
+  </div>
+  <h2 id="hProdList">পণ্যের তালিকা</h2>
+  <div id="productList"></div>
+</section>
+
+<section id="customers" class="panel">
+  <div id="customerListView">
+    <div class="card">
+      <h2 style="margin-top:0" id="hNewCust">নতুন কাস্টমার যোগ করুন</h2>
+      <div class="field"><label id="lCName">কাস্টমারের নাম</label><input id="cName" placeholder="যেমন: মো: রহিম মিয়া"></div>
+      <div class="row">
+        <div class="field"><label id="lCPhone">মোবাইল নম্বর</label><input id="cPhone" type="tel" placeholder="যেমন: 017xxxxxxxx"></div>
+        <div class="field"><label id="lCAddr">ঠিকানা</label><input id="cAddress" placeholder="যেমন: বাজারপাড়া"></div>
+      </div>
+      <button id="addCustomer" style="width:100%">কাস্টমার সংরক্ষণ</button>
+    </div>
+
+    <div class="card" style="margin-bottom:10px;">
+      <div class="field" style="margin:0;">
+        <label id="lSearch">কাস্টমার খুঁজুন (সিরিয়াল, নাম বা মোবাইল লিখে)</label>
+        <input id="searchCustomer" placeholder="🔍 সিরিয়াল, নাম বা মোবাইল নম্বর লিখে খুঁজুন...">
+      </div>
+    </div>
+
+    <h2 id="hCustList">কাস্টমার তালিকা ও বাকির পরিমাণ</h2>
+    <div class="card tablewrap" id="customerTable"></div>
+  </div>
+
+  <div id="customerDetailView" class="hide">
+    <button class="btn-light no-print" id="backToCustomers" style="margin-bottom:10px">← কাস্টমার তালিকায় ফিরে যান</button>
+    <div class="card" id="customerProfileCard"></div>
+    <div class="card no-print">
+      <h3 style="margin-top:0" id="hNewCustTx">নতুন লেনদেন যোগ করুন (মাল নেওয়া বা টাকা জমা)</h3>
+      <div class="field"><label id="lCTxType">লেনদেনের ধরন</label>
+        <select id="cTxType">
+          <option value="due_sale" id="optDueSale">বাকিতে পণ্য / মাল ক্রয়</option>
+          <option value="cash_collection" id="optCashColl">নগদ টাকা জমা (পরিশোধ)</option>
+        </select>
+      </div>
+      <div class="field"><label id="lCTxNote">বিবরণ / নোট</label><input id="cTxNote" placeholder="যেমন: ফিড বাবদ বা বাকি পরিশোধ"></div>
+      <div class="row">
+        <div class="field" id="cTxAmtWrap"><label id="lCTxAmt">মালের মূল্য (টাকা)</label><input id="cTxAmount" type="number" min="0" value="0"></div>
+        <div class="field"><label id="lCTxPaid">জমা / পরিশোধ (টাকা)</label><input id="cTxPaid" type="number" min="0" value="0"></div>
+      </div>
+      <button id="saveCustomerTx" style="width:100%">লেনদেন সংরক্ষণ</button>
+    </div>
+    <h2 id="hCustHist">লেনদেনের ইতিহাস</h2>
+    <div class="card tablewrap" id="customerTxTable"></div>
+    <div class="actions no-print" style="margin-top:15px">
+      <button id="printCustBtn" class="btn-blue">খাতা প্রিন্ট / PDF সংরক্ষণ</button>
+    </div>
+  </div>
+</section>
+
+<section id="records" class="panel">
+  <div class="sectionhead">
+    <h2 id="hAllRec">সব লেনদেনের রেকর্ড</h2>
+    <button class="btn-light" id="csvBtn">CSV ডাউনলোড</button>
+  </div>
+  <div class="card tablewrap" id="recordTable"></div>
+
+  <div class="card no-print">
+    <h3 style="margin-top:0" id="hBackup">ডাটা ব্যাকআপ ও রিস্টোর</h3>
+    <p class="muted" id="pBackupDesc">অ্যাপ আনইন্সটল বা ফোন পরিবর্তনের আগে আপনার সব পণ্যের স্টক ও কাস্টমার খাতার ব্যাকআপ সেভ করে রাখুন।</p>
+    <div class="actions">
+      <button class="btn-blue" id="exportJsonBtn">ব্যাকআপ সেভ করুন (JSON)</button>
+      <button class="btn-light" id="importJsonBtn">ব্যাকআপ রিস্টোর করুন</button>
+    </div>
+    <input type="file" id="importFile" accept=".json,application/json" class="hide">
+  </div>
+</section>
+
+<section id="report" class="panel">
+  <div class="card no-print">
+    <h2 style="margin-top:0" id="hRepTitle">রাতের দৈনিক হিসাব</h2>
+    <div class="field"><label id="lRepDate">তারিখ</label><input type="date" id="reportDate"></div>
+    <button id="makeReport" style="width:100%">হিসাব দেখুন</button>
+  </div>
+  <div id="reportResult"></div>
+  <div class="actions no-print"><button id="printBtn" class="btn-blue">প্রিন্ট / PDF সংরক্ষণ</button></div>
+</section>
+</div>
+
+<div class="footer" id="footerText">আপনার হিসাব এই ডিভাইসের ব্রাউজারেই সুরক্ষিত থাকবে</div>
+
+<script>
+const currentAppVersion = 3;
+const $ = id => document.getElementById(id);
+const storeKey = 'feedStockApp_v2';
+
+const translations = {
+  bn: {
+    title: "🐓 ফিড স্টক ও বাকির হিসাব",
+    sub: "স্টক • বিক্রি • কাস্টমার বাকির খাতা",
+    langBtn: "English",
+    tabs: ["ড্যাশবোর্ড", "ইনপুট / বিক্রি", "পণ্য", "বাকির খাতা", "রেকর্ড", "রাতের হিসাব"],
+    s1: "বর্তমান মোট মজুদ", s2: "আজকের ইনপুট", s3: "আজকের বিক্রি", s4: "মোট কাস্টমার বাকি", s5: "মোট অগ্রিম / অতিরিক্ত জমা",
+    unitWt: "বস্তা + কেজি", unitTaka: "টাকা",
+    hLatest: "আজকের সর্বশেষ রেকর্ড", hStockTable: "পণ্যভিত্তিক বর্তমান মজুদ",
+    hEntryTitle: "নতুন ইনপুট বা পণ্য বিক্রি", lKind: "লেনদেনের ধরন", optIn: "পণ্য ইনপুট (দোকানে এসেছে)", optOut: "পণ্য বিক্রি (দোকান থেকে গেছে)",
+    lProd: "পণ্য নির্বাচন", lBags: "বস্তার সংখ্যা", lKgs: "অতিরিক্ত কেজি", lCust: "বিক্রির কাস্টমার (বাকির খাতার জন্য)",
+    lPrice: "মোট বিক্রয় মূল্য (টাকা)", lPaid: "নগদ প্রাপ্তি / জমা (টাকা)", lDate: "তারিখ ও সময়", lNote: "বিবরণ / নোট (ঐচ্ছিক)",
+    phNote: "যেমন: চালান নম্বর বা মন্তব্য",
+    saveEntryBtn: "লেনদেন সংরক্ষণ করুন",
+    hNewProd: "নতুন পণ্য যোগ করুন", lPName: "পণ্যের নাম", lPCode: "পণ্যের কোড", lPWeight: "প্রতি বস্তায় কেজি", lPBags: "প্রাথমিক মজুদ (বস্তা)", lPKgs: "প্রাথমিক অতিরিক্ত কেজি", addProdBtn: "পণ্য সংরক্ষণ", hProdList: "পণ্যের তালিকা",
+    phPName: "যেমন: ব্রয়লার স্টার্টার", phPCode: "যেমন: F001",
+    hNewCust: "নতুন কাস্টমার যোগ করুন", lCName: "কাস্টমারের নাম", lCPhone: "মোবাইল নম্বর", lCAddr: "ঠিকানা", addCustBtn: "কাস্টমার সংরক্ষণ", lSearch: "কাস্টমার খুঁজুন (সিরিয়াল, নাম বা মোবাইল লিখে)", hCustList: "কাস্টমার তালিকা ও বাকির পরিমাণ",
+    phCName: "যেমন: মো: রহিম মিয়া", phCPhone: "যেমন: 017xxxxxxxx", phCAddr: "যেমন: বাজারপাড়া", phSearch: "🔍 সিরিয়াল, নাম বা মোবাইল নম্বর লিখে খুঁজুন...",
+    backCust: "← কাস্টমার তালিকায় ফিরে যান", hNewCustTx: "নতুন লেনদেন যোগ করুন (মাল নেওয়া বা টাকা জমা)", lCTxType: "লেনদেনের ধরন", optDueSale: "বাকিতে পণ্য / মাল ক্রয়", optCashColl: "নগদ টাকা জমা (পরিশোধ)", lCTxNote: "বিবরণ / নোট", lCTxAmt: "মালের মূল্য (টাকা)", lCTxPaid: "জমা / পরিশোধ (টাকা)", saveCustTxBtn: "লেনদেন সংরক্ষণ", hCustHist: "লেনদেনের ইতিহাস", printCustBtn: "খাতা প্রিন্ট / PDF সংরক্ষণ",
+    phCTxNote: "যেমন: ফিড বাবদ বা বাকি পরিশোধ",
+    hAllRec: "সব লেনদেনের রেকর্ড", csvBtn: "CSV ডাউনলোড",
+    hBackup: "ডাটা ব্যাকআপ ও রিস্টোর", pBackupDesc: "ফোন পরিবর্তনের আগে বা মাঝে মাঝে আপনার সব পণ্যের স্টক ও কাস্টমার খাতার ব্যাকআপ সেভ করে রাখুন।",
+    exportJsonBtn: "ব্যাকআপ সেভ করুন (JSON)", importJsonBtn: "ব্যাকআপ রিস্টোর করুন",
+    hRepTitle: "রাতের দৈনিক হিসাব", lRepDate: "তারিখ", makeRepBtn: "হিসাব দেখুন", printBtn: "প্রিন্ট / PDF সংরক্ষণ",
+    footer: "আপনার হিসাব এই ডিভাইসের ব্রাউজারেই সুরক্ষিত থাকবে",
+    noRecordToday: "আজ এখনো কোনো লেনদেন নেই।", noProd: "এখনো কোনো পণ্য যোগ করা হয়নি।", noCust: "কোনো কাস্টমার পাওয়া যায়নি।", noTx: "এই কাস্টমারের কোনো লেনদেন নেই।", noRec: "কোনো রেকর্ড নেই।"
+  },
+  en: {
+    title: "🐓 Feed Stock & Due Ledger",
+    sub: "Stock • Sales • Customer Ledger",
+    langBtn: "বাংলা",
+    tabs: ["Dashboard", "Input / Sales", "Products", "Customer Ledger", "Records", "Night Report"],
+    s1: "Total Stock", s2: "Today's Input", s3: "Today's Sales", s4: "Total Customer Due", s5: "Total Advance Deposit",
+    unitWt: "Bags + Kg", unitTaka: "BDT",
+    hLatest: "Latest Records Today", hStockTable: "Product-wise Stock",
+    hEntryTitle: "New Input or Product Sale", lKind: "Transaction Type", optIn: "Product Input (Stock In)", optOut: "Product Sale (Stock Out)",
+    lProd: "Select Product", lBags: "Number of Bags", lKgs: "Extra Kg", lCust: "Customer (Optional for Due)",
+    lPrice: "Total Price (BDT)", lPaid: "Cash Paid (BDT)", lDate: "Date & Time", lNote: "Note (Optional)",
+    phNote: "e.g., Invoice no. or remark",
+    saveEntryBtn: "Save Transaction",
+    hNewProd: "Add New Product", lPName: "Product Name", lPCode: "Product Code", lPWeight: "Kg Per Bag", lPBags: "Initial Bags", lPKgs: "Initial Extra Kg", addProdBtn: "Save Product", hProdList: "Product List",
+    phPName: "e.g., Broiler Starter", phPCode: "e.g., F001",
+    hNewCust: "Add New Customer", lCName: "Customer Name", lCPhone: "Mobile Number", lCAddr: "Address", addCustBtn: "Save Customer", lSearch: "Search Customer (Serial, Name, Phone)", hCustList: "Customer List & Due Amount",
+    phCName: "e.g., Md. Rahim Mia", phCPhone: "e.g., 017xxxxxxxx", phCAddr: "e.g., Bazarpara", phSearch: "🔍 Search by serial, name, or phone...",
+    backCust: "← Back to Customer List", hNewCustTx: "Add New Transaction (Purchase/Payment)", lCTxType: "Transaction Type", optDueSale: "Due Sale / Purchase", optCashColl: "Cash Payment Received", lCTxNote: "Description / Note", lCTxAmt: "Amount (BDT)", lCTxPaid: "Paid (BDT)", saveCustTxBtn: "Save Transaction", hCustHist: "Transaction History", printCustBtn: "Print / Save PDF",
+    phCTxNote: "e.g., Feed purchase or due payment",
+    hAllRec: "All Transaction Records", csvBtn: "Download CSV",
+    hBackup: "Data Backup & Restore", pBackupDesc: "Save a backup file regularly so you never lose your stock or customer ledger.",
+    exportJsonBtn: "Save Backup (JSON)", importJsonBtn: "Restore Backup",
+    hRepTitle: "Daily Night Report", lRepDate: "Date", makeRepBtn: "View Report", printBtn: "Print / Save PDF",
+    footer: "Your data is securely stored on this device",
+    noRecordToday: "No transactions today.", noProd: "No products added yet.", noCust: "No customers found.", noTx: "No transactions for this customer.", noRec: "No records found."
+  }
+};
+
+let currentLang = localStorage.getItem('feedAppLang') || 'bn';
+function t(key) { return translations[currentLang][key] || key; }
+
+let rawData = localStorage.getItem(storeKey);
+let db = rawData ? JSON.parse(rawData) : { products: [], tx: [], customers: [], customerTx: [], next: 1, cNext: 1, version: currentAppVersion };
+db.version = currentAppVersion;
+if (!db.products) db.products = [];
+if (!db.tx) db.tx = [];
+if (!db.customers) db.customers = [];
+if (!db.customerTx) db.customerTx = [];
+if (!db.next) db.next = 1;
+if (!db.cNext) db.cNext = db.customers.length + 1;
+
+db.customers.forEach((c, idx) => {
+  if (!c.serial) c.serial = `C-${String(idx + 1).padStart(3, '0')}`;
+});
+localStorage.setItem(storeKey, JSON.stringify(db));
+
+function save() {
+  localStorage.setItem(storeKey, JSON.stringify(db));
+  renderAll();
+}
+
+function bn(n) {
+  let num = Number(n || 0);
+  if (currentLang === 'en') return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  return num.toLocaleString('bn-BD', { maximumFractionDigits: 2 });
+}
+
+function dateLocal(d = new Date()) {
+  let x = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return x.toISOString().slice(0, 16);
+}
+function day(s) { return (s || '').slice(0, 10); }
+function product(id) { return db.products.find(p => p.id === id); }
+function stockKg(p) { return db.tx.filter(t => t.pid === p.id).reduce((a, t) => a + (t.kind === 'in' ? 1 : -1) * t.totalKg, 0); }
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function uuid() { return (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('id-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9)); }
+
+function qtyText(kg, p) {
+  let bags = Math.floor((kg + 1e-8) / p.weight), rem = kg - bags * p.weight;
+  if (currentLang === 'en') return `${bn(bags)} Bags${rem > 0.001 ? ' ' + bn(rem) + ' Kg' : ''} (${bn(kg)} Kg)`;
+  return `${bn(bags)} বস্তা${rem > 0.001 ? ' ' + bn(rem) + ' কেজি' : ''} (${bn(kg)} কেজি)`;
+}
+function totalQty(b, k, p) { return Math.max(0, Number(b) || 0) * p.weight + Math.max(0, Number(k) || 0); }
+
+function saveFileOut(filename, content, mimeType) {
+  let a = document.createElement('a');
+  let url = URL.createObjectURL(new Blob([content], { type: mimeType }));
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.panel').forEach(x => x.classList.toggle('active', x.id === name));
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
+  if (name === 'report') renderReport();
+  if (name === 'records') renderRecords();
+  if (name === 'customers') { activeCustomerId = null; $('searchCustomer').value = ''; renderCustomers(); }
+}
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+
+$('langToggleBtn').onclick = () => {
+  currentLang = currentLang === 'bn' ? 'en' : 'bn';
+  localStorage.setItem('feedAppLang', currentLang);
+  renderAll();
+};
+
+function updateTexts() {
+  $('tTitle').textContent = t('title');
+  $('tSub').textContent = t('sub');
+  $('langToggleBtn').textContent = t('langBtn');
+
+  let tKeys = t('tabs');
+  document.querySelectorAll('.tab').forEach((tab, i) => { if (tKeys[i]) tab.textContent = tKeys[i]; });
+
+  $('s1Title').textContent = t('s1');
   $('s2Title').textContent
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14532d">
+<title>ফিড স্টক ও বাকির হিসাব</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 108 108'%3E%3Crect width='108' height='108' fill='%23285D43'/%3E%3Cpath fill='%23E2EDC5' transform='translate(54,54) scale(0.78) translate(-54,-54)' d='M52,79L52,52C32,54 22,40 25,27C43,25 56,35 56,49C59,31 70,24 86,25C88,43 75,55 59,54L59,79Z'/%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%E0%A6%AB%E0%A6%BF%E0%A6%A1%20%E0%A6%B8%E0%A7%8D%E0%A6%9F%E0%A6%95%20%E0%A6%93%20%E0%A6%AC%E0%A6%BE%E0%A6%95%E0%A6%BF%E0%A6%B0%20%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22short_name%22%3A%22%E0%A6%AB%E0%A6%BF%E0%A6%A1%20%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f3f6f3%22%2C%22theme_color%22%3A%22%2314532d%22%7D">
+<style>
+:root{--green:#14532d;--green2:#166534;--bg:#f3f6f3;--card:#fff;--text:#17231b;--muted:#647067;--line:#e2e9e3;--red:#b42318;--blue:#175cd3}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif}
+header{background:linear-gradient(135deg,#14532d,#15803d);color:#fff;padding:16px;position:sticky;top:0;z-index:5;box-shadow:0 2px 10px #0002;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:19px;margin:0 0 2px}
+header p{margin:0;font-size:11px;opacity:.85}
+.lang-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.wrap{max-width:900px;margin:auto;padding:14px 12px 90px}
+.tabs{display:flex;gap:7px;overflow:auto;margin:0 0 14px;padding-bottom:2px}
+.tab{border:1px solid var(--line);background:#fff;border-radius:22px;padding:9px 14px;white-space:nowrap;font-weight:650;color:#334;cursor:pointer}
+.tab.active{background:var(--green);color:white;border-color:var(--green)}
+.panel{display:none}.panel.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat,.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:0 2px 8px #17351d08}
+.stat small{color:var(--muted);display:block;font-size:12px}
+.stat strong{font-size:22px;display:block;margin-top:5px}
+.stat span{font-size:11px;color:var(--muted)}
+h2{font-size:17px;margin:18px 2px 10px}
+.card{margin-bottom:12px}
+.row{display:flex;gap:10px;align-items:center}
+.row>*{flex:1;min-width:0}
+.field{margin:10px 0}
+.field label{display:block;font-size:12px;font-weight:650;margin:0 0 5px;color:#344238}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid #ccd7ce;border-radius:10px;background:white;font:inherit;font-size:14px;color:var(--text)}
+input:focus,select:focus{outline:2px solid #86c99a;border-color:var(--green)}
+button{border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:700;background:var(--green);color:#fff;cursor:pointer}
+.btn-light{background:#edf4ee;color:var(--green)}
+.btn-red{background:#fff0ee;color:var(--red)}
+.btn-blue{background:#eef4ff;color:var(--blue)}
+.btn-sm{padding:6px 10px;font-size:12px;border-radius:8px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions button{flex:1}
+.muted{color:var(--muted);font-size:12px}
+.tablewrap{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:520px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+th{color:#59665c;font-size:11px;background:#f8faf8}
+.pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.in{background:#e7f6ec;color:#16713a}
+.out{background:#fff0e8;color:#b54708}
+.empty{text-align:center;padding:22px;color:var(--muted);font-size:13px}
+.notice{padding:10px 12px;border-radius:10px;background:#fff8e6;color:#7a5200;font-size:12px;margin:10px 0}
+.serial{font-weight:800;color:var(--green)}
+.cname-bold{font-weight:800;font-size:15px;color:#0f2918}
+.hide{display:none!important}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.sectionhead h2{margin:18px 2px 10px}
+.footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:9px 14px calc(9px + env(safe-area-inset-bottom));text-align:center;color:var(--muted);font-size:11px}
+@media(min-width:650px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.wrap{padding-top:20px}.stat strong{font-size:25px}}
+@media print{
+  header,.tabs,.footer,.no-print,button{display:none!important}
+  .panel{display:none!important}
+  .panel.active{display:block!important}
+  .wrap{padding:0}
+  .card,.stat{box-shadow:none;break-inside:avoid}
+  body{background:white}
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1 id="tTitle">🐓 ফিড স্টক ও বাকির হিসাব</h1>
+    <p id="tSub">স্টক • বিক্রি • কাস্টমার বাকির খাতা</p>
+  </div>
+  <button class="lang-btn" id="langToggleBtn">English</button>
+</header>
+
+<div class="wrap">
+<nav class="tabs no-print">
+  <button class="tab active" data-tab="home" id="tabHome">ড্যাশবোর্ড</button>
+  <button class="tab" data-tab="entry" id="tabEntry">ইনপুট / বিক্রি</button>
+  <button class="tab" data-tab="products" id="tabProd">পণ্য</button>
+  <button class="tab" data-tab="customers" id="tabCust">বাকির খাতা</button>
+  <button class="tab" data-tab="records" id="tabRec">রেকর্ড</button>
+  <button class="tab" data-tab="report" id="tabRep">রাতের হিসাব</button>
+</nav>
+
+<section id="home" class="panel active">
+  <div class="grid">
+    <div class="stat"><small id="s1Title">বর্তমান মোট মজুদ</small><strong id="sStock">০</strong><span class="unit-wt">বস্তা + কেজি</span></div>
+    <div class="stat"><small id="s2Title">আজকের ইনপুট</small><strong id="sIn">০</strong><span class="unit-wt">বস্তা + কেজি</span></div>
+    <div class="stat"><small id="s3Title">আজকের বিক্রি</small><strong id="sOut">০</strong><span class="unit-wt">বস্তা + কেজি</span></div>
+    <div class="stat"><small id="s4Title">মোট কাস্টমার বাকি</small><strong id="sDue" style="color:var(--red)">৳০</strong><span id="uTaka">টাকা</span></div>
+    <div class="stat"><small id="s5Title">মোট অগ্রিম / অতিরিক্ত জমা</small><strong id="sAdv" style="color:var(--blue)">৳০</strong><span id="sAdvCount">০ জন কাস্টমার</span></div>
+  </div>
+  <h2 id="hLatest">আজকের সর্বশেষ রেকর্ড</h2>
+  <div class="card" id="latest"></div>
+  <h2 id="hStockTable">পণ্যভিত্তিক বর্তমান মজুদ</h2>
+  <div class="card tablewrap" id="stockTable"></div>
+</section>
+
+<section id="entry" class="panel">
+  <div class="card">
+    <h2 style="margin-top:0" id="hEntryTitle">নতুন ইনপুট বা পণ্য বিক্রি</h2>
+    <div class="field"><label id="lKind">লেনদেনের ধরন</label>
+      <select id="kind">
+        <option value="in" id="optIn">পণ্য ইনপুট (দোকানে এসেছে)</option>
+        <option value="out" id="optOut">পণ্য বিক্রি (দোকান থেকে গেছে)</option>
+      </select>
+    </div>
+    <div class="field"><label id="lProd">পণ্য নির্বাচন</label><select id="prodSelect"></select></div>
+    <div class="row">
+      <div class="field"><label id="lBags">বস্তার সংখ্যা</label><input id="bags" type="number" min="0" step="1" value="0"></div>
+      <div class="field"><label id="lKgs">অতিরিক্ত কেজি</label><input id="kgs" type="number" min="0" step="0.01" value="0"></div>
+    </div>
+
+    <div id="saleSection" style="display:none;border-top:1px dashed var(--line);margin-top:12px;padding-top:12px;">
+      <div class="field"><label id="lCust">বিক্রির কাস্টমার (বাকির খাতার জন্য)</label><select id="txCustomer"><option value="">-- কাস্টমার ছাড়া / নগদ বিক্রি --</option></select></div>
+      <div class="row">
+        <div class="field"><label id="lPrice">মোট বিক্রয় মূল্য (টাকা)</label><input id="totalPrice" type="number" min="0" value="0"></div>
+        <div class="field"><label id="lPaid">নগদ প্রাপ্তি / জমা (টাকা)</label><input id="paidAmount" type="number" min="0" value="0"></div>
+      </div>
+    </div>
+
+    <div class="field"><label id="lDate">তারিখ ও সময়</label><input id="entryDate" type="datetime-local"></div>
+    <div class="field"><label id="lNote">বিবরণ / নোট (ঐচ্ছিক)</label><input id="note" placeholder="যেমন: চালান নম্বর বা মন্তব্য"></div>
+    <div class="notice" id="calc">মোট পরিমাণ: ০ কেজি</div>
+    <button id="saveEntry" style="width:100%">লেনদেন সংরক্ষণ করুন</button>
+  </div>
+</section>
+
+<section id="products" class="panel">
+  <div class="card">
+    <h2 style="margin-top:0" id="hNewProd">নতুন পণ্য যোগ করুন</h2>
+    <div class="field"><label id="lPName">পণ্যের নাম</label><input id="pName" placeholder="যেমন: ব্রয়লার স্টার্টার"></div>
+    <div class="row">
+      <div class="field"><label id="lPCode">পণ্যের কোড</label><input id="pCode" placeholder="যেমন: F001"></div>
+      <div class="field"><label id="lPWeight">প্রতি বস্তায় কেজি</label><input id="pWeight" type="number" min="0.01" step="0.01" value="50"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label id="lPBags">প্রাথমিক মজুদ (বস্তা)</label><input id="pBags" type="number" min="0" step="1" value="0"></div>
+      <div class="field"><label id="lPKgs">প্রাথমিক অতিরিক্ত কেজি</label><input id="pKgs" type="number" min="0" step="0.01" value="0"></div>
+    </div>
+    <button id="addProduct" style="width:100%">পণ্য সংরক্ষণ</button>
+  </div>
+  <h2 id="hProdList">পণ্যের তালিকা</h2>
+  <div id="productList"></div>
+</section>
+
+<section id="customers" class="panel">
+  <div id="customerListView">
+    <div class="card">
+      <h2 style="margin-top:0" id="hNewCust">নতুন কাস্টমার যোগ করুন</h2>
+      <div class="field"><label id="lCName">কাস্টমারের নাম</label><input id="cName" placeholder="যেমন: মো: রহিম মিয়া"></div>
+      <div class="row">
+        <div class="field"><label id="lCPhone">মোবাইল নম্বর</label><input id="cPhone" type="tel" placeholder="যেমন: 017xxxxxxxx"></div>
+        <div class="field"><label id="lCAddr">ঠিকানা</label><input id="cAddress" placeholder="যেমন: বাজারপাড়া"></div>
+      </div>
+      <button id="addCustomer" style="width:100%">কাস্টমার সংরক্ষণ</button>
+    </div>
+
+    <div class="card" style="margin-bottom:10px;">
+      <div class="field" style="margin:0;">
+        <label id="lSearch">কাস্টমার খুঁজুন (সিরিয়াল, নাম বা মোবাইল লিখে)</label>
+        <input id="searchCustomer" placeholder="🔍 সিরিয়াল, নাম বা মোবাইল নম্বর লিখে খুঁজুন...">
+      </div>
+    </div>
+
+    <h2 id="hCustList">কাস্টমার তালিকা ও বাকির পরিমাণ</h2>
+    <div class="card tablewrap" id="customerTable"></div>
+  </div>
+
+  <div id="customerDetailView" class="hide">
+    <button class="btn-light no-print" id="backToCustomers" style="margin-bottom:10px">← কাস্টমার তালিকায় ফিরে যান</button>
+    <div class="card" id="customerProfileCard"></div>
+    <div class="card no-print">
+      <h3 style="margin-top:0" id="hNewCustTx">নতুন লেনদেন যোগ করুন (মাল নেওয়া বা টাকা জমা)</h3>
+      <div class="field"><label id="lCTxType">লেনদেনের ধরন</label>
+        <select id="cTxType">
+          <option value="due_sale" id="optDueSale">বাকিতে পণ্য / মাল ক্রয়</option>
+          <option value="cash_collection" id="optCashColl">নগদ টাকা জমা (পরিশোধ)</option>
+        </select>
+      </div>
+      <div class="field"><label id="lCTxNote">বিবরণ / নোট</label><input id="cTxNote" placeholder="যেমন: ফিড বাবদ বা বাকি পরিশোধ"></div>
+      <div class="row">
+        <div class="field" id="cTxAmtWrap"><label id="lCTxAmt">মালের মূল্য (টাকা)</label><input id="cTxAmount" type="number" min="0" value="0"></div>
+        <div class="field"><label id="lCTxPaid">জমা / পরিশোধ (টাকা)</label><input id="cTxPaid" type="number" min="0" value="0"></div>
+      </div>
+      <button id="saveCustomerTx" style="width:100%">লেনদেন সংরক্ষণ</button>
+    </div>
+    <h2 id="hCustHist">লেনদেনের ইতিহাস</h2>
+    <div class="card tablewrap" id="customerTxTable"></div>
+    <div class="actions no-print" style="margin-top:15px">
+      <button id="printCustBtn" class="btn-blue">খাতা প্রিন্ট / PDF সংরক্ষণ</button>
+    </div>
+  </div>
+</section>
+
+<section id="records" class="panel">
+  <div class="sectionhead">
+    <h2 id="hAllRec">সব লেনদেনের রেকর্ড</h2>
+    <button class="btn-light" id="csvBtn">CSV ডাউনলোড</button>
+  </div>
+  <div class="card tablewrap" id="recordTable"></div>
+
+  <div class="card no-print">
+    <h3 style="margin-top:0" id="hBackup">ডাটা ব্যাকআপ ও রিস্টোর</h3>
+    <p class="muted" id="pBackupDesc">অ্যাপ আনইন্সটল বা ফোন পরিবর্তনের আগে আপনার সব পণ্যের স্টক ও কাস্টমার খাতার ব্যাকআপ সেভ করে রাখুন।</p>
+    <div class="actions">
+      <button class="btn-blue" id="exportJsonBtn">ব্যাকআপ সেভ করুন (JSON)</button>
+      <button class="btn-light" id="importJsonBtn">ব্যাকআপ রিস্টোর করুন</button>
+    </div>
+    <input type="file" id="importFile" accept=".json,application/json" class="hide">
+  </div>
+</section>
+
+<section id="report" class="panel">
+  <div class="card no-print">
+    <h2 style="margin-top:0" id="hRepTitle">রাতের দৈনিক হিসাব</h2>
+    <div class="field"><label id="lRepDate">তারিখ</label><input type="date" id="reportDate"></div>
+    <button id="makeReport" style="width:100%">হিসাব দেখুন</button>
+  </div>
+  <div id="reportResult"></div>
+  <div class="actions no-print"><button id="printBtn" class="btn-blue">প্রিন্ট / PDF সংরক্ষণ</button></div>
+</section>
+</div>
+
+<div class="footer" id="footerText">আপনার হিসাব এই ডিভাইসের ব্রাউজারেই সুরক্ষিত থাকবে</div>
+
+<script>
+const currentAppVersion = 3;
+const $ = id => document.getElementById(id);
+const storeKey = 'feedStockApp_v2';
+
+const translations = {
+  bn: {
+    title: "🐓 ফিড স্টক ও বাকির হিসাব",
+    sub: "স্টক • বিক্রি • কাস্টমার বাকির খাতা",
+    langBtn: "English",
+    tabs: ["ড্যাশবোর্ড", "ইনপুট / বিক্রি", "পণ্য", "বাকির খাতা", "রেকর্ড", "রাতের হিসাব"],
+    s1: "বর্তমান মোট মজুদ", s2: "আজকের ইনপুট", s3: "আজকের বিক্রি", s4: "মোট কাস্টমার বাকি", s5: "মোট অগ্রিম / অতিরিক্ত জমা",
+    unitWt: "বস্তা + কেজি", unitTaka: "টাকা",
+    hLatest: "আজকের সর্বশেষ রেকর্ড", hStockTable: "পণ্যভিত্তিক বর্তমান মজুদ",
+    hEntryTitle: "নতুন ইনপুট বা পণ্য বিক্রি", lKind: "লেনদেনের ধরন", optIn: "পণ্য ইনপুট (দোকানে এসেছে)", optOut: "পণ্য বিক্রি (দোকান থেকে গেছে)",
+    lProd: "পণ্য নির্বাচন", lBags: "বস্তার সংখ্যা", lKgs: "অতিরিক্ত কেজি", lCust: "বিক্রির কাস্টমার (বাকির খাতার জন্য)",
+    lPrice: "মোট বিক্রয় মূল্য (টাকা)", lPaid: "নগদ প্রাপ্তি / জমা (টাকা)", lDate: "তারিখ ও সময়", lNote: "বিবরণ / নোট (ঐচ্ছিক)",
+    phNote: "যেমন: চালান নম্বর বা মন্তব্য",
+    saveEntryBtn: "লেনদেন সংরক্ষণ করুন",
+    hNewProd: "নতুন পণ্য যোগ করুন", lPName: "পণ্যের নাম", lPCode: "পণ্যের কোড", lPWeight: "প্রতি বস্তায় কেজি", lPBags: "প্রাথমিক মজুদ (বস্তা)", lPKgs: "প্রাথমিক অতিরিক্ত কেজি", addProdBtn: "পণ্য সংরক্ষণ", hProdList: "পণ্যের তালিকা",
+    phPName: "যেমন: ব্রয়লার স্টার্টার", phPCode: "যেমন: F001",
+    hNewCust: "নতুন কাস্টমার যোগ করুন", lCName: "কাস্টমারের নাম", lCPhone: "মোবাইল নম্বর", lCAddr: "ঠিকানা", addCustBtn: "কাস্টমার সংরক্ষণ", lSearch: "কাস্টমার খুঁজুন (সিরিয়াল, নাম বা মোবাইল লিখে)", hCustList: "কাস্টমার তালিকা ও বাকির পরিমাণ",
+    phCName: "যেমন: মো: রহিম মিয়া", phCPhone: "যেমন: 017xxxxxxxx", phCAddr: "যেমন: বাজারপাড়া", phSearch: "🔍 সিরিয়াল, নাম বা মোবাইল নম্বর লিখে খুঁজুন...",
+    backCust: "← কাস্টমার তালিকায় ফিরে যান", hNewCustTx: "নতুন লেনদেন যোগ করুন (মাল নেওয়া বা টাকা জমা)", lCTxType: "লেনদেনের ধরন", optDueSale: "বাকিতে পণ্য / মাল ক্রয়", optCashColl: "নগদ টাকা জমা (পরিশোধ)", lCTxNote: "বিবরণ / নোট", lCTxAmt: "মালের মূল্য (টাকা)", lCTxPaid: "জমা / পরিশোধ (টাকা)", saveCustTxBtn: "লেনদেন সংরক্ষণ", hCustHist: "লেনদেনের ইতিহাস", printCustBtn: "খাতা প্রিন্ট / PDF সংরক্ষণ",
+    phCTxNote: "যেমন: ফিড বাবদ বা বাকি পরিশোধ",
+    hAllRec: "সব লেনদেনের রেকর্ড", csvBtn: "CSV ডাউনলোড",
+    hBackup: "ডাটা ব্যাকআপ ও রিস্টোর", pBackupDesc: "ফোন পরিবর্তনের আগে বা মাঝে মাঝে আপনার সব পণ্যের স্টক ও কাস্টমার খাতার ব্যাকআপ সেভ করে রাখুন।",
+    exportJsonBtn: "ব্যাকআপ সেভ করুন (JSON)", importJsonBtn: "ব্যাকআপ রিস্টোর করুন",
+    hRepTitle: "রাতের দৈনিক হিসাব", lRepDate: "তারিখ", makeRepBtn: "হিসাব দেখুন", printBtn: "প্রিন্ট / PDF সংরক্ষণ",
+    footer: "আপনার হিসাব এই ডিভাইসের ব্রাউজারেই সুরক্ষিত থাকবে",
+    noRecordToday: "আজ এখনো কোনো লেনদেন নেই।", noProd: "এখনো কোনো পণ্য যোগ করা হয়নি।", noCust: "কোনো কাস্টমার পাওয়া যায়নি।", noTx: "এই কাস্টমারের কোনো লেনদেন নেই।", noRec: "কোনো রেকর্ড নেই।"
+  },
+  en: {
+    title: "🐓 Feed Stock & Due Ledger",
+    sub: "Stock • Sales • Customer Ledger",
+    langBtn: "বাংলা",
+    tabs: ["Dashboard", "Input / Sales", "Products", "Customer Ledger", "Records", "Night Report"],
+    s1: "Total Stock", s2: "Today's Input", s3: "Today's Sales", s4: "Total Customer Due", s5: "Total Advance Deposit",
+    unitWt: "Bags + Kg", unitTaka: "BDT",
+    hLatest: "Latest Records Today", hStockTable: "Product-wise Stock",
+    hEntryTitle: "New Input or Product Sale", lKind: "Transaction Type", optIn: "Product Input (Stock In)", optOut: "Product Sale (Stock Out)",
+    lProd: "Select Product", lBags: "Number of Bags", lKgs: "Extra Kg", lCust: "Customer (Optional for Due)",
+    lPrice: "Total Price (BDT)", lPaid: "Cash Paid (BDT)", lDate: "Date & Time", lNote: "Note (Optional)",
+    phNote: "e.g., Invoice no. or remark",
+    saveEntryBtn: "Save Transaction",
+    hNewProd: "Add New Product", lPName: "Product Name", lPCode: "Product Code", lPWeight: "Kg Per Bag", lPBags: "Initial Bags", lPKgs: "Initial Extra Kg", addProdBtn: "Save Product", hProdList: "Product List",
+    phPName: "e.g., Broiler Starter", phPCode: "e.g., F001",
+    hNewCust: "Add New Customer", lCName: "Customer Name", lCPhone: "Mobile Number", lCAddr: "Address", addCustBtn: "Save Customer", lSearch: "Search Customer (Serial, Name, Phone)", hCustList: "Customer List & Due Amount",
+    phCName: "e.g., Md. Rahim Mia", phCPhone: "e.g., 017xxxxxxxx", phCAddr: "e.g., Bazarpara", phSearch: "🔍 Search by serial, name, or phone...",
+    backCust: "← Back to Customer List", hNewCustTx: "Add New Transaction (Purchase/Payment)", lCTxType: "Transaction Type", optDueSale: "Due Sale / Purchase", optCashColl: "Cash Payment Received", lCTxNote: "Description / Note", lCTxAmt: "Amount (BDT)", lCTxPaid: "Paid (BDT)", saveCustTxBtn: "Save Transaction", hCustHist: "Transaction History", printCustBtn: "Print / Save PDF",
+    phCTxNote: "e.g., Feed purchase or due payment",
+    hAllRec: "All Transaction Records", csvBtn: "Download CSV",
+    hBackup: "Data Backup & Restore", pBackupDesc: "Save a backup file regularly so you never lose your stock or customer ledger.",
+    exportJsonBtn: "Save Backup (JSON)", importJsonBtn: "Restore Backup",
+    hRepTitle: "Daily Night Report", lRepDate: "Date", makeRepBtn: "View Report", printBtn: "Print / Save PDF",
+    footer: "Your data is securely stored on this device",
+    noRecordToday: "No transactions today.", noProd: "No products added yet.", noCust: "No customers found.", noTx: "No transactions for this customer.", noRec: "No records found."
+  }
+};
+
+let currentLang = localStorage.getItem('feedAppLang') || 'bn';
+function t(key) { return translations[currentLang][key] || key; }
+
+let rawData = localStorage.getItem(storeKey);
+let db = rawData ? JSON.parse(rawData) : { products: [], tx: [], customers: [], customerTx: [], next: 1, cNext: 1, version: currentAppVersion };
+db.version = currentAppVersion;
+if (!db.products) db.products = [];
+if (!db.tx) db.tx = [];
+if (!db.customers) db.customers = [];
+if (!db.customerTx) db.customerTx = [];
+if (!db.next) db.next = 1;
+if (!db.cNext) db.cNext = db.customers.length + 1;
+
+db.customers.forEach((c, idx) => {
+  if (!c.serial) c.serial = `C-${String(idx + 1).padStart(3, '0')}`;
+});
+localStorage.setItem(storeKey, JSON.stringify(db));
+
+function save() {
+  localStorage.setItem(storeKey, JSON.stringify(db));
+  renderAll();
+}
+
+function bn(n) {
+  let num = Number(n || 0);
+  if (currentLang === 'en') return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  return num.toLocaleString('bn-BD', { maximumFractionDigits: 2 });
+}
+
+function dateLocal(d = new Date()) {
+  let x = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return x.toISOString().slice(0, 16);
+}
+function day(s) { return (s || '').slice(0, 10); }
+function product(id) { return db.products.find(p => p.id === id); }
+function stockKg(p) { return db.tx.filter(t => t.pid === p.id).reduce((a, t) => a + (t.kind === 'in' ? 1 : -1) * t.totalKg, 0); }
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function uuid() { return (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('id-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9)); }
+
+function qtyText(kg, p) {
+  let bags = Math.floor((kg + 1e-8) / p.weight), rem = kg - bags * p.weight;
+  if (currentLang === 'en') return `${bn(bags)} Bags${rem > 0.001 ? ' ' + bn(rem) + ' Kg' : ''} (${bn(kg)} Kg)`;
+  return `${bn(bags)} বস্তা${rem > 0.001 ? ' ' + bn(rem) + ' কেজি' : ''} (${bn(kg)} কেজি)`;
+}
+function totalQty(b, k, p) { return Math.max(0, Number(b) || 0) * p.weight + Math.max(0, Number(k) || 0); }
+
+function saveFileOut(filename, content, mimeType) {
+  let a = document.createElement('a');
+  let url = URL.createObjectURL(new Blob([content], { type: mimeType }));
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.panel').forEach(x => x.classList.toggle('active', x.id === name));
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
+  if (name === 'report') renderReport();
+  if (name === 'records') renderRecords();
+  if (name === 'customers') { activeCustomerId = null; $('searchCustomer').value = ''; renderCustomers(); }
+}
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+
+$('langToggleBtn').onclick = () => {
+  currentLang = currentLang === 'bn' ? 'en' : 'bn';
+  localStorage.setItem('feedAppLang', currentLang);
+  renderAll();
+};
+
+function updateTexts() {
+  $('tTitle').textContent = t('title');
+  $('tSub').textContent = t('sub');
+  $('langToggleBtn').textContent = t('langBtn');
+
+  let tKeys = t('tabs');
+  document.querySelectorAll('.tab').forEach((tab, i) => { if (tKeys[i]) tab.textContent = tKeys[i]; });
+
+  $('s1Title').textContent = t('s1');
+  $('s2Title').textContent = t('s2');
+  $('s3Title').textContent = t('s3');
+  $('s4Title').textContent = t('s4');
+  $('s5Title').textContent = t('s5');
+  document.querySelectorAll('.unit-wt').forEach(el => el.textContent = t('unitWt'));
+  $('uTaka').textContent = t('unitTaka');
+  $('hLatest').textContent = t('hLatest');
+  $('hStockTable').textContent = t('hStockTable');
+
+  $('hEntryTitle').textContent = t('hEntryTitle');
+  $('lKind').textContent = t('lKind');
+  $('optIn').textContent = t('optIn');
+  $('optOut').textContent = t('optOut');
+  $('lProd').textContent = t('lProd');
+  $('lBags').textContent = t('lBags');
+  $('lKgs').textContent = t('lKgs');
+  $('lCust').textContent = t('lCust');
+  $('lPrice').textContent = t('lPrice');
+  $('lPaid').textContent = t('lPaid');
+  $('lDate').textContent = t('lDate');
+  $('lNote').textContent = t('lNote');
+  $('note').placeholder = t('phNote');
+  $('saveEntry').textContent = t('saveEntryBtn');
+
+  $('hNewProd').textContent = t('hNewProd');
+  $('lPName').textContent = t('lPName'); $('pName').placeholder = t('phPName');
+  $('lPCode').textContent = t('lPCode'); $('pCode').placeholder = t('phPCode');
+  $('lPWeight').textContent = t('lPWeight');
+  $('lPBags').textContent = t('lPBags');
+  $('lPKgs').textContent = t('lPKgs');
+  $('addProduct').textContent = t('addProdBtn');
+  $('hProdList').textContent = t('hProdList');
+
+  $('hNewCust').textContent = t('hNewCust');
+  $('lCName').textContent = t('lCName'); $('cName').placeholder = t('phCName');
+  $('lCPhone').textContent = t('lCPhone'); $('cPhone').placeholder = t('phCPhone');
+  $('lCAddr').textContent = t('lCAddr'); $('cAddress').placeholder = t('phCAddr');
+  $('addCustomer').textContent = t('addCustBtn');
+  $('lSearch').textContent = t('lSearch'); $('searchCustomer').placeholder = t('phSearch');
+  $('hCustList').textContent = t('hCustList');
+
+  $('backToCustomers').textContent = t('backCust');
+  $('hNewCustTx').textContent = t('hNewCustTx');
+  $('lCTxType').textContent = t('lCTxType');
+  $('optDueSale').textContent = t('optDueSale');
+  $('optCashColl').textContent = t('optCashColl');
+  $('lCTxNote').textContent = t('lCTxNote'); $('cTxNote').placeholder = t('phCTxNote');
+  $('lCTxAmt').textContent = t('lCTxAmt');
+  $('lCTxPaid').textContent = t('lCTxPaid');
+  $('saveCustomerTx').textContent = t('saveCustTxBtn');
+  $('hCustHist').textContent = t('hCustHist');
+  $('printCustBtn').textContent = t('printCustBtn');
+
+  $('hAllRec').textContent = t('hAllRec');
+  $('csvBtn').textContent = t('csvBtn');
+  $('hBackup').textContent = t('hBackup');
+  $('pBackupDesc').textContent = t('pBackupDesc');
+  $('exportJsonBtn').textContent = t('exportJsonBtn');
+  $('importJsonBtn').textContent = t('importJsonBtn');
+
+  $('hRepTitle').textContent = t('hRepTitle');
+  $('lRepDate').textContent = t('lRepDate');
+  $('makeReport').textContent = t('makeRepBtn');
+  $('printBtn').textContent = t('printBtn');
+  $('footerText').textContent = t('footer');
+}
+
+function renderSelect() {
+  let old = $('prodSelect').value;
+  $('prodSelect').innerHTML = db.products.map(p => `<option value="${p.id}">${esc(p.name)} (${esc(p.code)}) — ${bn(p.weight)} ${currentLang === 'en' ? 'Kg/Bag' : 'কেজি/বস্তা'}</option>`).join('');
+  if (old && product(old)) $('prodSelect').value = old;
+
+  let cOld = $('txCustomer').value;
+  let noCustText = currentLang === 'en' ? "-- Without Customer / Cash Sale --" : "-- কাস্টমার ছাড়া / নগদ বিক্রি --";
+  let noNumText = currentLang === 'en' ? "No phone" : "নম্বর নেই";
+  $('txCustomer').innerHTML = `<option value="">${noCustText}</option>` + db.customers.map(c => `<option value="${c.id}">[${esc(c.serial)}] ${esc(c.name)} (${esc(c.phone || noNumText)})</option>`).join('');
+  if (cOld) $('txCustomer').value = cOld;
+  updateCalc();
+}
+
+function updateCalc() {
+  let p = product($('prodSelect').value);
+  let prefix = currentLang === 'en' ? 'Total Quantity:' : 'মোট পরিমাণ:';
+  let unitText = currentLang === 'en' ? 'Kg' : 'কেজি';
+  let promptText = currentLang === 'en' ? 'Please add a product first' : 'আগে একটি পণ্য যোগ করুন';
+  $('calc').textContent = p ? `${prefix} ${bn(totalQty($('bags').value, $('kgs').value, p))} ${unitText}` : promptText;
+}
+
+function toggleSaleSection() {
+  $('saleSection').style.display = $('kind').value === 'out' ? 'block' : 'none';
+}
+
+function toggleCTxFields() {
+  let isCash = $('cTxType').value === 'cash_collection';
+  $('cTxAmtWrap').style.display = isCash ? 'none' : 'block';
+  if (isCash) $('cTxAmount').value = '0';
+}
+
+$('bags').oninput = $('kgs').oninput = updateCalc;
+$('prodSelect').onchange = updateCalc;
+$('kind').onchange = toggleSaleSection;
+$('cTxType').onchange = toggleCTxFields;
+
+$('addProduct').onclick = () => {
+  let name = $('pName').value.trim(), code = $('pCode').value.trim() || `F${String(db.products.length + 1).padStart(3, '0')}`, weight = Number($('pWeight').value), b = Number($('pBags').value) || 0, k = Number($('pKgs').value) || 0;
+  if (!name || weight <= 0 || b < 0 || k < 0) return alert(currentLang === 'en' ? 'Please enter product name, correct weight and stock.' : 'পণ্যের নাম, সঠিক বস্তার ওজন ও মজুদ দিন।');
+  let p = { id: uuid(), name, code, weight };
+  db.products.push(p);
+  let initText = currentLang === 'en' ? "Initial Stock" : "প্রাথমিক মজুদ";
+  if (b * weight + k > 0) db.tx.push({ id: uuid(), serial: `IN-${String(db.next++).padStart(5, '0')}`, pid: p.id, kind: 'in', bags: b, kgs: k, totalKg: b * weight + k, date: dateLocal(), note: initText });
+  $('pName').value = $('pCode').value = ''; $('pBags').value = '0'; $('pKgs').value = '0';
+  save();
+  alert(currentLang === 'en' ? 'Product saved successfully.' : 'পণ্য সংরক্ষণ হয়েছে।');
+};
+
+$('saveEntry').onclick = () => {
+  let kind = $('kind').value, p = product($('prodSelect').value), b = Number($('bags').value) || 0, k = Number($('kgs').value) || 0, total = p ? totalQty(b, k, p) : 0;
+  if (!p) return alert(currentLang === 'en' ? 'Please add a product first.' : 'আগে পণ্য যোগ করুন।');
+  if (b < 0 || k < 0 || total <= 0) return alert(currentLang === 'en' ? 'Please enter correct quantity.' : 'সঠিক পরিমাণ দিন।');
+
+  if (kind === 'out' && total > stockKg(p) + 0.0001) {
+    let stockMsg = currentLang === 'en' ? `Insufficient stock. Current stock: ${qtyText(stockKg(p), p)}` : `পর্যাপ্ত মজুদ নেই। বর্তমান মজুদ ${qtyText(stockKg(p), p)}`;
+    return alert(stockMsg);
+  }
+
+  let dt = $('entryDate').value || dateLocal();
+  let serial = `${kind === 'in' ? 'IN' : 'OUT'}-${String(db.next++).padStart(5, '0')}`;
+  db.tx.push({ id: uuid(), serial, pid: p.id, kind, bags: b, kgs: k, totalKg: total, date: dt, note: $('note').value.trim() });
+
+  if (kind === 'out') {
+    let cid = $('txCustomer').value;
+    let tPrice = Number($('totalPrice').value) || 0;
+    let paid = Number($('paidAmount').value) || 0;
+    if (cid && (tPrice > 0 || paid > 0)) {
+      let descText = currentLang === 'en' ? `Sale: ${p.name} (${bn(b)} Bags + ${bn(k)} Kg)` : `বিক্রি: ${p.name} (${bn(b)} বস্তা + ${bn(k)} কেজি)`;
+      db.customerTx.push({ id: uuid(), cid, date: dt, desc: descText, amount: tPrice, paid });
+    }
+  }
+
+  $('bags').value = '0'; $('kgs').value = '0'; $('note').value = ''; $('totalPrice').value = '0'; $('paidAmount').value = '0'; $('entryDate').value = dateLocal();
+  save();
+  alert(currentLang === 'en' ? 'Transaction saved successfully.' : 'লেনদেন সফলভাবে সংরক্ষণ করা হয়েছে।');
+};
+
+let activeCustomerId = null;
+$('addCustomer').onclick = () => {
+  let name = $('cName').value.trim(), phone = $('cPhone').value.trim(), address = $('cAddress').value.trim();
+  if (!name) return alert(currentLang === 'en' ? 'Please enter customer name.' : 'কাস্টমারের নাম দিন।');
+  let serial = `C-${String(db.cNext++).padStart(3, '0')}`;
+  db.customers.push({ id: uuid(), serial, name, phone, address });
+  $('cName').value = $('cPhone').value = $('cAddress').value = '';
+  save();
+  alert(currentLang === 'en' ? `Customer added. Serial: ${serial}` : `কাস্টমার যোগ করা হয়েছে। সিরিয়াল নম্বর: ${serial}`);
+};
+
+function getCustomerBalance(cid) {
+  return db.customerTx.filter(t => t.cid === cid).reduce((a, t) => a + (t.amount - t.paid), 0);
+}
+
+function renderCustomers() {
+  $('customerListView').classList.remove('hide');
+  $('customerDetailView').classList.add('hide');
+
+  let searchTxt = $('searchCustomer').value.toLowerCase().trim();
+  let filteredCustomers = db.customers.filter(c => {
+    return (c.serial || '').toLowerCase().includes(searchTxt) ||
+      (c.name || '').toLowerCase().includes(searchTxt) ||
+      (c.phone || '').includes(searchTxt);
+  });
+
+  let thSerial = currentLang === 'en' ? 'Serial' : 'সিরিয়াল';
+  let thName = currentLang === 'en' ? 'Name' : 'নাম';
+  let thPhone = currentLang === 'en' ? 'Mobile' : 'মোবাইল';
+  let thAddr = currentLang === 'en' ? 'Address' : 'ঠিকানা';
+  let thStatus = currentLang === 'en' ? 'Current Status' : 'বর্তমান অবস্থা';
+
+  $('customerTable').innerHTML = filteredCustomers.length ? `<table><thead><tr><th>${thSerial}</th><th>${thName}</th><th>${thPhone}</th><th>${thAddr}</th><th>${thStatus}</th></tr></thead><tbody>${filteredCustomers.map(c => {
+    let bal = getCustomerBalance(c.id);
+    let dueText = currentLang === 'en' ? `Due: ৳${bn(bal)}` : `বাকি: ৳${bn(bal)}`;
+    let advText = currentLang === 'en' ? `Advance: ৳${bn(Math.abs(bal))}` : `অগ্রিম / অতিরিক্ত: ৳${bn(Math.abs(bal))}`;
+    let paidText = currentLang === 'en' ? `Paid (0)` : `পরিশোধিত (০)`;
+    let balText = bal > 0 ? `<span style="color:var(--red)">${dueText}</span>` : bal < 0 ? `<span style="color:var(--blue)">${advText}</span>` : `<span class="muted">${paidText}</span>`;
+    return `<tr style="cursor:pointer" onclick="openCustomer('${c.id}')"><td><span class="serial">${esc(c.serial)}</span></td><td><span class="cname-bold">${esc(c.name)}</span></td><td><b>${esc(c.phone || '—')}</b></td><td>${esc(c.address || '—')}</td><td><b>${balText}</b></td></tr>`;
+  }).join('')}</tbody></table>` : `<div class="empty">${t('noCust')}</div>`;
+}
+
+$('searchCustomer').oninput = renderCustomers;
+
+window.openCustomer = id => {
+  activeCustomerId = id;
+  let c = db.customers.find(x => x.id === id);
+  if (!c) { activeCustomerId = null; renderCustomers(); return; }
+  $('customerListView').classList.add('hide');
+  $('customerDetailView').classList.remove('hide');
+
+  let txs = db.customerTx.filter(t => t.cid === id).sort((a, b) => a.date.localeCompare(b.date));
+  let runningBal = 0;
+
+  let phoneLbl = currentLang === 'en' ? 'Mobile' : 'মোবাইল';
+  let addrLbl = currentLang === 'en' ? 'Address' : 'ঠিকানা';
+  let noneText = currentLang === 'en' ? 'None' : 'নেই';
+  let editBtnText = currentLang === 'en' ? 'Edit Info' : 'তথ্য এডিট';
+  let delBtnText = currentLang === 'en' ? 'Delete' : 'ডিলিট';
+
+  $('customerProfileCard').innerHTML = `<div class="serial" style="margin-bottom:4px">Serial: ${esc(c.serial)}</div><h2 style="margin:0 0 6px 0;font-size:21px;font-weight:800" class="cname-bold">${esc(c.name)}</h2><div class="muted">${phoneLbl}: <b style="color:var(--text)">${esc(c.phone || noneText)}</b> • ${addrLbl}: ${esc(c.address || noneText)}</div><div class="no-print" style="margin-top:12px;display:flex;gap:8px;"><button class="btn-light" onclick="editCustomer('${c.id}')">${editBtnText}</button><button class="btn-red" onclick="deleteCustomer('${c.id}')">${delBtnText}</button></div>`;
+
+  let thDate = currentLang === 'en' ? 'Date' : 'তারিখ';
+  let thDesc = currentLang === 'en' ? 'Description' : 'বিবরণ';
+  let thAmt = currentLang === 'en' ? 'Price' : 'মূল্য';
+  let thPaid = currentLang === 'en' ? 'Paid' : 'জমা';
+  let thRem = currentLang === 'en' ? 'Balance' : 'অবশিষ্ট বাকি';
+  let thAct = currentLang === 'en' ? 'Action' : 'কাজ';
+  let delTxLbl = currentLang === 'en' ? 'Del' : 'মুছুন';
+
+  $('customerTxTable').innerHTML = txs.length ? `<table><thead><tr><th>${thDate}</th><th>${thDesc}</th><th>${thAmt}</th><th>${thPaid}</th><th>${thRem}</th><th class="no-print">${thAct}</th></tr></thead><tbody>${txs.map(tx => {
+    runningBal += (tx.amount - tx.paid);
+    let rDue = currentLang === 'en' ? `৳${bn(runningBal)} Due` : `৳${bn(runningBal)} বাকি`;
+    let rAdv = currentLang === 'en' ? `৳${bn(Math.abs(runningBal))} Adv` : `৳${bn(Math.abs(runningBal))} অগ্রিম`;
+    let rZero = `৳${bn(0)}`;
+    return `<tr><td>${esc(tx.date.replace('T', ' '))}</td><td>${esc(tx.desc)}</td><td>৳${bn(tx.amount)}</td><td>৳${bn(tx.paid)}</td><td><b>${runningBal > 0 ? `<span style="color:var(--red)">${rDue}</span>` : runningBal < 0 ? `<span style="color:var(--blue)">${rAdv}</span>` : rZero}</b></td><td class="no-print"><button class="btn-red btn-sm" onclick="deleteCustomerTx('${tx.id}')">${delTxLbl}</button></td></tr>`;
+  }).join('')}</tbody></table>` : `<div class="empty">${t('noTx')}</div>`;
+};
+
+window.deleteCustomerTx = txId => {
+  let msg = currentLang === 'en' ? 'Delete this customer transaction?' : 'এই লেনদেনটি মুছে ফেলতে চান?';
+  if (!confirm(msg)) return;
+  db.customerTx = db.customerTx.filter(t => t.id !== txId);
+  save();
+};
+
+window.editCustomer = id => {
+  let c = db.customers.find(x => x.id === id);
+  if (!c) return;
+  let name = prompt(currentLang === 'en' ? 'Customer Name' : 'কাস্টমারের নাম', c.name); if (name === null) return;
+  let phone = prompt(currentLang === 'en' ? 'Mobile Number' : 'মোবাইল নম্বর', c.phone || ''); if (phone === null) return;
+  let address = prompt(currentLang === 'en' ? 'Address' : 'ঠিকানা', c.address || ''); if (address === null) return;
+  if (!name.trim()) return alert(currentLang === 'en' ? 'Customer name is required.' : 'কাস্টমারের নাম আবশ্যক।');
+  c.name = name.trim(); c.phone = phone.trim(); c.address = address.trim();
+  save();
+  alert(currentLang === 'en' ? 'Customer info updated successfully.' : 'কাস্টমারের তথ্য আপডেট করা হয়েছে।');
+};
+
+window.deleteCustomer = id => {
+  let confirmMsg = currentLang === 'en' ? 'Do you want to delete this customer and all ledger history?' : 'এই কাস্টমার এবং তার সমস্ত খাতা চিরতরে মুছে ফেলতে চান?';
+  if (!confirm(confirmMsg)) return;
+  db.customers = db.customers.filter(c => c.id !== id);
+  db.customerTx = db.customerTx.filter(t => t.cid !== id);
+  activeCustomerId = null;
+  save();
+  alert(currentLang === 'en' ? 'Customer deleted.' : 'কাস্টমার ডিলিট করা হয়েছে।');
+};
+
+$('backToCustomers').onclick = () => { activeCustomerId = null; renderCustomers(); };
+$('printCustBtn').onclick = () => window.print();
+
+$('saveCustomerTx').onclick = () => {
+  if (!activeCustomerId) return;
+  let defaultDesc = currentLang === 'en' ? ($('cTxType').value === 'due_sale' ? 'Due Purchase' : 'Cash Payment') : ($('cTxType').value === 'due_sale' ? 'বাকিতে মাল ক্রয়' : 'নগদ টাকা জমা');
+  let desc = $('cTxNote').value.trim() || defaultDesc;
+  let amount = $('cTxType').value === 'cash_collection' ? 0 : (Number($('cTxAmount').value) || 0);
+  let paid = Number($('cTxPaid').value) || 0;
+  if (amount <= 0 && paid <= 0) return alert(currentLang === 'en' ? 'Please enter correct amount or payment.' : 'সঠিক পরিমাণ বা জমা দিন।');
+
+  db.customerTx.push({ id: uuid(), cid: activeCustomerId, date: dateLocal(), desc, amount, paid });
+  $('cTxNote').value = ''; $('cTxAmount').value = '0'; $('cTxPaid').value = '0';
+  save();
+  alert(currentLang === 'en' ? 'Transaction saved.' : 'লেনদেন সংরক্ষিত হয়েছে।');
+};
+
+function renderHome() {
+  let today = day(dateLocal()), tx = db.tx.filter(t => day(t.date) === today);
+  let ins = tx.filter(t => t.kind === 'in').reduce((a, t) => a + t.totalKg, 0);
+  let outs = tx.filter(t => t.kind === 'out').reduce((a, t) => a + t.totalKg, 0);
+  let total = db.products.reduce((a, p) => a + stockKg(p), 0);
+
+  let totalDue = 0, totalAdvance = 0, advCustomerCount = 0;
+  db.customers.forEach(c => {
+    let b = getCustomerBalance(c.id);
+    if (b > 0) totalDue += b;
+    else if (b < 0) { totalAdvance += Math.abs(b); advCustomerCount++; }
+  });
+
+  let unitKg = currentLang === 'en' ? ' Kg' : ' কেজি';
+  let custCountText = currentLang === 'en' ? `${bn(advCustomerCount)} customers` : `${bn(advCustomerCount)} জন কাস্টমার`;
+
+  $('sStock').textContent = bn(total) + unitKg;
+  $('sIn').textContent = bn(ins) + unitKg;
+  $('sOut').textContent = bn(outs) + unitKg;
+  $('sDue').textContent = `৳${bn(totalDue)}`;
+  $('sAdv').textContent = `৳${bn(totalAdvance)}`;
+  $('sAdvCount').textContent = custCountText;
+
+  let latest = [...tx].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
+  $('latest').innerHTML = latest.length ? latest.map(txItem => {
+    let typeName = txItem.kind === 'in' ? (currentLang === 'en' ? 'Input' : 'ইনপুট') : (currentLang === 'en' ? 'Sale' : 'বিক্রি');
+    return `<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b class="serial">${esc(txItem.serial)}</b><div>${esc(product(txItem.pid)?.name || (currentLang === 'en' ? 'Product' : 'পণ্য'))}</div><small class="muted">${esc(txItem.date.replace('T', ' '))}</small></div><div style="text-align:right"><span class="pill ${txItem.kind}">${typeName}</span><b style="display:block">${bn(txItem.totalKg)}${unitKg}</b></div></div>`;
+  }).join('') : `<div class="empty">${t('noRecordToday')}</div>`;
+
+  let thCode = currentLang === 'en' ? 'Code' : 'কোড';
+  let thProd = currentLang === 'en' ? 'Product' : 'পণ্য';
+  let thStock = currentLang === 'en' ? 'Stock' : 'মজুদ';
+
+  $('stockTable').innerHTML = db.products.length ? `<table><thead><tr><th>${thCode}</th><th>${thProd}</th><th>${thStock}</th></tr></thead><tbody>${db.products.map(p => `<tr><td>${esc(p.code)}</td><td>${esc(p.name)}<small class="muted" style="display:block">${bn(p.weight)} ${currentLang === 'en' ? 'Kg/Bag' : 'কেজি/বস্তা'}</small></td><td><b>${qtyText(stockKg(p), p)}</b></td></tr>`).join('')}</tbody></table>` : `<div class="empty">${t('noProd')}</div>`;
+}
+
+function renderProducts() {
+  let editBtnTxt = currentLang === 'en' ? 'Edit' : 'এডিট';
+  let delBtnTxt = currentLang === 'en' ? 'Delete' : 'ডিলিট';
+  $('productList').innerHTML = db.products.length ? db.products.map(p => `<div class="card"><div class="row"><div><b class="cname-bold">${esc(p.name)}</b><div class="muted">${esc(p.code)} • ${bn(p.weight)} ${currentLang === 'en' ? 'Kg/Bag' : 'কেজি/বস্তা'}</div><b style="color:var(--green)">${qtyText(stockKg(p), p)}</b></div><div style="display:flex;gap:6px;flex:0 0 auto;"><button class="btn-light" onclick="editProduct('${p.id}')">${editBtnTxt}</button><button class="btn-red" onclick="deleteProduct('${p.id}')">${delBtnTxt}</button></div></div></div>`).join('') : `<div class="card empty">${t('noProd')}</div>`;
+}
+
+window.editProduct = id => {
+  let p = product(id); if (!p) return;
+  let name = prompt(currentLang === 'en' ? 'Product Name' : 'পণ্যের নাম', p.name); if (name === null) return;
+  let code = prompt(currentLang === 'en' ? 'Product Code' : 'পণ্যের কোড', p.code); if (code === null) return;
+  let wInput = prompt(currentLang === 'en' ? 'Kg per Bag' : 'প্রতি বস্তার ওজন (কেজি)', p.weight); if (wInput === null) return;
+  let w = Number(wInput);
+  if (!name.trim() || !code.trim() || !Number.isFinite(w) || w <= 0) return alert(currentLang === 'en' ? 'Invalid information.' : 'তথ্য সঠিক নয়।');
+  p.name = name.trim(); p.code = code.trim(); p.weight = w;
+  save();
+  alert(currentLang === 'en' ? 'Product info updated.' : 'পণ্যের তথ্য আপডেট করা হয়েছে।');
+};
+
+window.deleteProduct = id => {
+  let confirmMsg = currentLang === 'en' ? 'Do you want to delete this product?' : 'এই পণ্যটি ডিলিট করতে চান?';
+  if (!confirm(confirmMsg)) return;
+  db.products = db.products.filter(p => p.id !== id);
+  save();
+};
+
+function renderRecords() {
+  let arr = [...db.tx].sort((a, b) => b.date.localeCompare(a.date));
+  let thSer = currentLang === 'en' ? 'Serial' : 'সিরিয়াল';
+  let thDT = currentLang === 'en' ? 'Date/Time' : 'তারিখ/সময়';
+  let thP = currentLang === 'en' ? 'Product' : 'পণ্য';
+  let thT = currentLang === 'en' ? 'Type' : 'ধরন';
+  let thQ = currentLang === 'en' ? 'Quantity' : 'পরিমাণ';
+  let thAct = currentLang === 'en' ? 'Action' : 'কাজ';
+  let unitKg = currentLang === 'en' ? ' Kg' : ' কেজি';
+  let bagText = currentLang === 'en' ? ' Bags + ' : ' বস্তা + ';
+
+  $('recordTable').innerHTML = arr.length ? `<table><thead><tr><th>${thSer}</th><th>${thDT}</th><th>${thP}</th><th>${thT}</th><th>${thQ}</th><th>${thAct}</th></tr></thead><tbody>${arr.map(txItem => {
+    let p = product(txItem.pid);
+    let typeName = txItem.kind === 'in' ? (currentLang === 'en' ? 'Input' : 'ইনপুট') : (currentLang === 'en' ? 'Sale' : 'বিক্রি');
+    let delBtn = currentLang === 'en' ? 'Delete' : 'মুছুন';
+    return `<tr><td><b>${esc(txItem.serial)}</b></td><td>${esc(txItem.date.replace('T', ' '))}</td><td>${esc(p?.name || '—')}</td><td><span class="pill ${txItem.kind}">${typeName}</span></td><td>${bn(txItem.bags)}${bagText}${bn(txItem.kgs)}${unitKg}<br>${bn(txItem.totalKg)}${unitKg}</td><td><button class="btn-red btn-sm" onclick="deleteTx('${txItem.id}')">${delBtn}</button></td></tr>`;
+  }).join('')}</tbody></table>` : `<div class="empty">${t('noRec')}</div>`;
+}
+
+window.deleteTx = id => {
+  let confirmMsg = currentLang === 'en' ? 'Delete this record?' : 'এই রেকর্ড মুছবেন?';
+  if (!confirm(confirmMsg)) return;
+  db.tx = db.tx.filter(x => x.id !== id);
+  save();
+};
+
+function renderReport() {
+  let d = $('reportDate').value || day(dateLocal()); $('reportDate').value = d;
+  let tx = db.tx.filter(t => day(t.date) === d);
+  let ins = tx.filter(t => t.kind === 'in').reduce((a, t) => a + t.totalKg, 0);
+  let outs = tx.filter(t => t.kind === 'out').reduce((a, t) => a + t.totalKg, 0);
+
+  let totalDue = 0, totalAdvance = 0;
+  db.customers.forEach(c => {
+    let b = getCustomerBalance(c.id);
+    if (b > 0) totalDue += b;
+    else if (b < 0) totalAdvance += Math.abs(b);
+  });
+
+  let unitKg = currentLang === 'en' ? ' Kg' : ' কেজি';
+  let r1 = currentLang === 'en' ? 'Total Input Today' : 'আজ মোট ইনপুট';
+  let r2 = currentLang === 'en' ? 'Total Sales Today' : 'আজ মোট বিক্রি';
+  let r3 = currentLang === 'en' ? 'Total Customer Due' : 'বর্তমান মোট কাস্টমার বাকি';
+  let r4 = currentLang === 'en' ? 'Total Advance Deposit' : 'বর্তমান মোট অগ্রিম জমা';
+  let r5 = currentLang === 'en' ? `${d} — Product-wise Night Stock` : `${d} — পণ্যভিত্তিক রাতের মজুদ`;
+  let thP = currentLang === 'en' ? 'Product' : 'পণ্য';
+  let thIn = currentLang === 'en' ? "Today's Input" : 'দিনের ইনপুট';
+  let thOut = currentLang === 'en' ? "Today's Sales" : 'দিনের বিক্রি';
+  let thStk = currentLang === 'en' ? 'Current Stock' : 'বর্তমান মজুদ';
+
+  $('reportResult').innerHTML = `
+    <div class="grid">
+      <div class="stat"><small>${r1}</small><strong>${bn(ins)}${unitKg}</strong></div>
+      <div class="stat"><small>${r2}</small><strong>${bn(outs)}${unitKg}</strong></div>
+      <div class="stat"><small>${r3}</small><strong style="color:var(--red)">৳${bn(totalDue)}</strong></div>
+      <div class="stat"><small>${r4}</small><strong style="color:var(--blue)">৳${bn(totalAdvance)}</strong></div>
+    </div>
+    <h2>${r5}</h2>
+    <div class="card tablewrap">
+      <table>
+        <thead><tr><th>${thP}</th><th>${thIn}</th><th>${thOut}</th><th>${thStk}</th></tr></thead>
+        <tbody>${db.products.map(p => {
+          let a = tx.filter(t => t.pid === p.id && t.kind === 'in').reduce((s, t) => s + t.totalKg, 0);
+          let b = tx.filter(t => t.pid === p.id && t.kind === 'out').reduce((s, t) => s + t.totalKg, 0);
+          return `<tr><td>${esc(p.name)}<small class="muted" style="display:block">${esc(p.code)}</small></td><td>${qtyText(a, p)}</td><td>${qtyText(b, p)}</td><td><b>${qtyText(stockKg(p), p)}</b></td></tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+}
+$('makeReport').onclick = renderReport;
+$('printBtn').onclick = () => window.print();
+
+$('csvBtn').onclick = () => {
+  let rows = [['Serial', 'DateTime', 'Product', 'Code', 'Type', 'Bags', 'ExtraKg', 'TotalKg', 'Note'], ...db.tx.map(t => { let p = product(t.pid); return [t.serial, t.date, p?.name || '', p?.code || '', t.kind, t.bags, t.kgs, t.totalKg, t.note || '']; })];
+  let csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
+  saveFileOut(`feed-stock-${day(dateLocal())}.csv`, csv, 'text/csv;charset=utf-8');
+};
+
+$('exportJsonBtn').onclick = () => {
+  saveFileOut(`feed-backup-${day(dateLocal())}.json`, JSON.stringify(db, null, 2), 'application/json');
+};
+
+$('importJsonBtn').onclick = () => $('importFile').click();
+$('importFile').onchange = e => {
+  let file = e.target.files[0];
+  if (!file) return;
+  let reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      let data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data.products) || !Array.isArray(data.tx)) throw new Error('Invalid');
+      let msg = currentLang === 'en' ? 'Restore backup? Current data will be replaced.' : 'ব্যাকআপ রিস্টোর করবেন? বর্তমান ডাটা পরিবর্তন হয়ে ব্যাকআপের ডাটা বসে যাবে।';
+      if (!confirm(msg)) return;
+      db = {
+        products: data.products || [],
+        tx: data.tx || [],
+        customers: data.customers || [],
+        customerTx: data.customerTx || [],
+        next: data.next || 1,
+        cNext: data.cNext || (data.customers ? data.customers.length + 1 : 1),
+        version: currentAppVersion
+      };
+      save();
+      alert(currentLang === 'en' ? 'Backup restored successfully!' : 'ব্যাকআপ সফলভাবে রিস্টোর হয়েছে!');
+    } catch (err) {
+      alert(currentLang === 'en' ? 'Invalid backup file.' : 'সঠিক ব্যাকআপ ফাইল নয়।');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+};
+
+function renderAll() {
+  updateTexts();
+  renderSelect();
+  toggleSaleSection();
+  toggleCTxFields();
+  renderHome();
+  renderProducts();
+  renderRecords();
+  if (activeCustomerId) openCustomer(activeCustomerId);
+  else renderCustomers();
+}
+
+$('entryDate').value = dateLocal();
+$('reportDate').value = day(dateLocal());
+renderAll();
+</script>
+</body>
+</html><!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14532d">
+<title>ফিড স্টক ও বাকির হিসাব</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 108 108'%3E%3Crect width='108' height='108' fill='%23285D43'/%3E%3Cpath fill='%23E2EDC5' transform='translate(54,54) scale(0.78) translate(-54,-54)' d='M52,79L52,52C32,54 22,40 25,27C43,25 56,35 56,49C59,31 70,24 86,25C88,43 75,55 59,54L59,79Z'/%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%E0%A6%AB%E0%A6%BF%E0%A6%A1%20%E0%A6%B8%E0%A7%8D%E0%A6%9F%E0%A6%95%20%E0%A6%93%20%E0%A6%AC%E0%A6%BE%E0%A6%95%E0%A6%BF%E0%A6%B0%20%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22short_name%22%3A%22%E0%A6%AB%E0%A6%BF%E0%A6%A1%20%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f3f6f3%22%2C%22theme_color%22%3A%22%2314532d%22%7D">
+<style>
+:root{--green:#14532d;--green2:#166534;--bg:#f3f6f3;--card:#fff;--text:#17231b;--muted:#647067;--line:#e2e9e3;--red:#b42318;--blue:#175cd3}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif}
+header{background:linear-gradient(135deg,#14532d,#15803d);color:#fff;padding:16px;position:sticky;top:0;z-index:5;box-shadow:0 2px 10px #0002;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:19px;margin:0 0 2px}
+header p{margin:0;font-size:11px;opacity:.85}
+.lang-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.wrap{max-width:900px;margin:auto;padding:14px 12px 90px}
+.tabs{display:flex;gap:7px;overflow:auto;margin:0 0 14px;padding-bottom:2px}
+.tab{border:1px solid var(--line);background:#fff;border-radius:22px;padding:9px 14px;white-space:nowrap;font-weight:650;color:#334;cursor:pointer}
+.tab.active{background:var(--green);color:white;border-color:var(--green)}
+.panel{display:none}.panel.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat,.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:0 2px 8px #17351d08}
+.stat small{color:var(--muted);display:block;font-size:12px}
+.stat strong{font-size:22px;display:block;margin-top:5px}
+.stat span{font-size:11px;color:var(--muted)}
+h2{font-size:17px;margin:18px 2px 10px}
+.card{margin-bottom:12px}
+.row{display:flex;gap:10px;align-items:center}
+.row>*{flex:1;min-width:0}
+.field{margin:10px 0}
+.field label{display:block;font-size:12px;font-weight:650;margin:0 0 5px;color:#344238}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid #ccd7ce;border-radius:10px;background:white;font:inherit;font-size:14px;color:var(--text)}
+input:focus,select:focus{outline:2px solid #86c99a;border-color:var(--green)}
+button{border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:700;background:var(--green);color:#fff;cursor:pointer}
+.btn-light{background:#edf4ee;color:var(--green)}
+.btn-red{background:#fff0ee;color:var(--red)}
+.btn-blue{background:#eef4ff;color:var(--blue)}
+.btn-sm{padding:6px 10px;font-size:12px;border-radius:8px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions button{flex:1}
+.muted{color:var(--muted);font-size:12px}
+.tablewrap{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:520px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+th{color:#59665c;font-size:11px;background:#f8faf8}
+.pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.in{background:#e7f6ec;color:#16713a}
+.out{background:#fff0e8;color:#b54708}
+.empty{text-align:center;padding:22px;color:var(--muted);font-size:13px}
+.notice{padding:10px 12px;border-radius:10px;background:#fff8e6;color:#7a5200;font-size:12px;margin:10px 0}
+.serial{font-weight:800;color:var(--green)}
+.cname-bold{font-weight:800;font-size:15px;color:#0f2918}
+.hide{display:none!important}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.sectionhead h2{margin:18px 2px 10px}
+.footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:9px 14px calc(9px + env(safe-area-inset-bottom));text-align:center;color:var(--muted);font-size:11px}
+@media(min-width:650px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.wrap{padding-top:20px}.stat strong{font-size:25px}}
+@media print{
+  header,.tabs,.footer,.no-print,button{display:none!important}
+  .panel{display:none!important}
+  .panel.active{display:block!important}
+  .wrap{padding:0}
+  .card,.stat{box-shadow:none;break-inside:avoid}
+  body{background:white}
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1 id="tTitle">🐓 ফিড স্টক ও বাকির হিসাব</h1>
+    <p id="tSub">স্টক • বিক্রি • কাস্টমার বাকির খাতা</p>
+  </div>
+  <button class="lang-btn" id="langToggleBtn">English</button>
+</header>
+
+<div class="wrap">
+<nav class="tabs no-print">
+  <button class="tab active" data-tab="home" id="tabHome">ড্যাশবোর্ড</button>
+  <button class="tab" data-tab="entry" id="tabEntry">ইনপুট / বিক্রি</button>
+  <button class="tab" data-tab="products" id="tabProd">পণ্য</button>
+  <button class="tab" data-tab="customers" id="tabCust">বাকির খাতা</button>
+  <button class="tab" data-tab="records" id="tabRec">রেকর্ড</button>
+  <button class="tab" data-tab="report" id="tabRep">রাতের হিসাব</button>
+</nav>
+
+<section id="home" class="panel active">
+  <div class="grid">
+    <div class="stat"><small id="s1Title">বর্তমান মোট মজুদ</small><strong id="sStock">০</strong><span class="unit-wt">বস্তা + কেজি</span></div>
+    <div class="stat"><small id="s2Title">আজকের ইনপুট</small><strong id="sIn">০</strong><span class="unit-wt">বস্তা + কেজি</span></div>
+    <div class="stat"><small id="s3Title">আজকের বিক্রি</small><strong id="sOut">০</strong><span class="unit-wt">বস্তা + কেজি</span></div>
+    <div class="stat"><small id="s4Title">মোট কাস্টমার বাকি</small><strong id="sDue" style="color:var(--red)">৳০</strong><span id="uTaka">টাকা</span></div>
+    <div class="stat"><small id="s5Title">মোট অগ্রিম / অতিরিক্ত জমা</small><strong id="sAdv" style="color:var(--blue)">৳০</strong><span id="sAdvCount">০ জন কাস্টমার</span></div>
+  </div>
+  <h2 id="hLatest">আজকের সর্বশেষ রেকর্ড</h2>
+  <div class="card" id="latest"></div>
+  <h2 id="hStockTable">পণ্যভিত্তিক বর্তমান মজুদ</h2>
+  <div class="card tablewrap" id="stockTable"></div>
+</section>
+
+<section id="entry" class="panel">
+  <div class="card">
+    <h2 style="margin-top:0" id="hEntryTitle">নতুন ইনপুট বা পণ্য বিক্রি</h2>
+    <div class="field"><label id="lKind">লেনদেনের ধরন</label>
+      <select id="kind">
+        <option value="in" id="optIn">পণ্য ইনপুট (দোকানে এসেছে)</option>
+        <option value="out" id="optOut">পণ্য বিক্রি (দোকান থেকে গেছে)</option>
+      </select>
+    </div>
+    <div class="field"><label id="lProd">পণ্য নির্বাচন</label><select id="prodSelect"></select></div>
+    <div class="row">
+      <div class="field"><label id="lBags">বস্তার সংখ্যা</label><input id="bags" type="number" min="0" step="1" value="0"></div>
+      <div class="field"><label id="lKgs">অতিরিক্ত কেজি</label><input id="kgs" type="number" min="0" step="0.01" value="0"></div>
+    </div>
+
+    <div id="saleSection" style="display:none;border-top:1px dashed var(--line);margin-top:12px;padding-top:12px;">
+      <div class="field"><label id="lCust">বিক্রির কাস্টমার (বাকির খাতার জন্য)</label><select id="txCustomer"><option value="">-- কাস্টমার ছাড়া / নগদ বিক্রি --</option></select></div>
+      <div class="row">
+        <div class="field"><label id="lPrice">মোট বিক্রয় মূল্য (টাকা)</label><input id="totalPrice" type="number" min="0" value="0"></div>
+        <div class="field"><label id="lPaid">নগদ প্রাপ্তি / জমা (টাকা)</label><input id="paidAmount" type="number" min="0" value="0"></div>
+      </div>
+    </div>
+
+    <div class="field"><label id="lDate">তারিখ ও সময়</label><input id="entryDate" type="datetime-local"></div>
+    <div class="field"><label id="lNote">বিবরণ / নোট (ঐচ্ছিক)</label><input id="note" placeholder="যেমন: চালান নম্বর বা মন্তব্য"></div>
+    <div class="notice" id="calc">মোট পরিমাণ: ০ কেজি</div>
+    <button id="saveEntry" style="width:100%">লেনদেন সংরক্ষণ করুন</button>
+  </div>
+</section>
+
+<section id="products" class="panel">
+  <div class="card">
+    <h2 style="margin-top:0" id="hNewProd">নতুন পণ্য যোগ করুন</h2>
+    <div class="field"><label id="lPName">পণ্যের নাম</label><input id="pName" placeholder="যেমন: ব্রয়লার স্টার্টার"></div>
+    <div class="row">
+      <div class="field"><label id="lPCode">পণ্যের কোড</label><input id="pCode" placeholder="যেমন: F001"></div>
+      <div class="field"><label id="lPWeight">প্রতি বস্তায় কেজি</label><input id="pWeight" type="number" min="0.01" step="0.01" value="50"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label id="lPBags">প্রাথমিক মজুদ (বস্তা)</label><input id="pBags" type="number" min="0" step="1" value="0"></div>
+      <div class="field"><label id="lPKgs">প্রাথমিক অতিরিক্ত কেজি</label><input id="pKgs" type="number" min="0" step="0.01" value="0"></div>
+    </div>
+    <button id="addProduct" style="width:100%">পণ্য সংরক্ষণ</button>
+  </div>
+  <h2 id="hProdList">পণ্যের তালিকা</h2>
+  <div id="productList"></div>
+</section>
+
+<section id="customers" class="panel">
+  <div id="customerListView">
+    <div class="card">
+      <h2 style="margin-top:0" id="hNewCust">নতুন কাস্টমার যোগ করুন</h2>
+      <div class="field"><label id="lCName">কাস্টমারের নাম</label><input id="cName" placeholder="যেমন: মো: রহিম মিয়া"></div>
+      <div class="row">
+        <div class="field"><label id="lCPhone">মোবাইল নম্বর</label><input id="cPhone" type="tel" placeholder="যেমন: 017xxxxxxxx"></div>
+        <div class="field"><label id="lCAddr">ঠিকানা</label><input id="cAddress" placeholder="যেমন: বাজারপাড়া"></div>
+      </div>
+      <button id="addCustomer" style="width:100%">কাস্টমার সংরক্ষণ</button>
+    </div>
+
+    <div class="card" style="margin-bottom:10px;">
+      <div class="field" style="margin:0;">
+        <label id="lSearch">কাস্টমার খুঁজুন (সিরিয়াল, নাম বা মোবাইল লিখে)</label>
+        <input id="searchCustomer" placeholder="🔍 সিরিয়াল, নাম বা মোবাইল নম্বর লিখে খুঁজুন...">
+      </div>
+    </div>
+
+    <h2 id="hCustList">কাস্টমার তালিকা ও বাকির পরিমাণ</h2>
+    <div class="card tablewrap" id="customerTable"></div>
+  </div>
+
+  <div id="customerDetailView" class="hide">
+    <button class="btn-light no-print" id="backToCustomers" style="margin-bottom:10px">← কাস্টমার তালিকায় ফিরে যান</button>
+    <div class="card" id="customerProfileCard"></div>
+    <div class="card no-print">
+      <h3 style="margin-top:0" id="hNewCustTx">নতুন লেনদেন যোগ করুন (মাল নেওয়া বা টাকা জমা)</h3>
+      <div class="field"><label id="lCTxType">লেনদেনের ধরন</label>
+        <select id="cTxType">
+          <option value="due_sale" id="optDueSale">বাকিতে পণ্য / মাল ক্রয়</option>
+          <option value="cash_collection" id="optCashColl">নগদ টাকা জমা (পরিশোধ)</option>
+        </select>
+      </div>
+      <div class="field"><label id="lCTxNote">বিবরণ / নোট</label><input id="cTxNote" placeholder="যেমন: ফিড বাবদ বা বাকি পরিশোধ"></div>
+      <div class="row">
+        <div class="field" id="cTxAmtWrap"><label id="lCTxAmt">মালের মূল্য (টাকা)</label><input id="cTxAmount" type="number" min="0" value="0"></div>
+        <div class="field"><label id="lCTxPaid">জমা / পরিশোধ (টাকা)</label><input id="cTxPaid" type="number" min="0" value="0"></div>
+      </div>
+      <button id="saveCustomerTx" style="width:100%">লেনদেন সংরক্ষণ</button>
+    </div>
+    <h2 id="hCustHist">লেনদেনের ইতিহাস</h2>
+    <div class="card tablewrap" id="customerTxTable"></div>
+    <div class="actions no-print" style="margin-top:15px">
+      <button id="printCustBtn" class="btn-blue">খাতা প্রিন্ট / PDF সংরক্ষণ</button>
+    </div>
+  </div>
+</section>
+
+<section id="records" class="panel">
+  <div class="sectionhead">
+    <h2 id="hAllRec">সব লেনদেনের রেকর্ড</h2>
+    <button class="btn-light" id="csvBtn">CSV ডাউনলোড</button>
+  </div>
+  <div class="card tablewrap" id="recordTable"></div>
+
+  <div class="card no-print">
+    <h3 style="margin-top:0" id="hBackup">ডাটা ব্যাকআপ ও রিস্টোর</h3>
+    <p class="muted" id="pBackupDesc">অ্যাপ আনইন্সটল বা ফোন পরিবর্তনের আগে আপনার সব পণ্যের স্টক ও কাস্টমার খাতার ব্যাকআপ সেভ করে রাখুন।</p>
+    <div class="actions">
+      <button class="btn-blue" id="exportJsonBtn">ব্যাকআপ সেভ করুন (JSON)</button>
+      <button class="btn-light" id="importJsonBtn">ব্যাকআপ রিস্টোর করুন</button>
+    </div>
+    <input type="file" id="importFile" accept=".json,application/json" class="hide">
+  </div>
+</section>
+
+<section id="report" class="panel">
+  <div class="card no-print">
+    <h2 style="margin-top:0" id="hRepTitle">রাতের দৈনিক হিসাব</h2>
+    <div class="field"><label id="lRepDate">তারিখ</label><input type="date" id="reportDate"></div>
+    <button id="makeReport" style="width:100%">হিসাব দেখুন</button>
+  </div>
+  <div id="reportResult"></div>
+  <div class="actions no-print"><button id="printBtn" class="btn-blue">প্রিন্ট / PDF সংরক্ষণ</button></div>
+</section>
+</div>
+
+<div class="footer" id="footerText">আপনার হিসাব এই ডিভাইসের ব্রাউজারেই সুরক্ষিত থাকবে</div>
+
+<script>
+const currentAppVersion = 3;
+const $ = id => document.getElementById(id);
+const storeKey = 'feedStockApp_v2';
+
+const translations = {
+  bn: {
+    title: "🐓 ফিড স্টক ও বাকির হিসাব",
+    sub: "স্টক • বিক্রি • কাস্টমার বাকির খাতা",
+    langBtn: "English",
+    tabs: ["ড্যাশবোর্ড", "ইনপুট / বিক্রি", "পণ্য", "বাকির খাতা", "রেকর্ড", "রাতের হিসাব"],
+    s1: "বর্তমান মোট মজুদ", s2: "আজকের ইনপুট", s3: "আজকের বিক্রি", s4: "মোট কাস্টমার বাকি", s5: "মোট অগ্রিম / অতিরিক্ত জমা",
+    unitWt: "বস্তা + কেজি", unitTaka: "টাকা",
+    hLatest: "আজকের সর্বশেষ রেকর্ড", hStockTable: "পণ্যভিত্তিক বর্তমান মজুদ",
+    hEntryTitle: "নতুন ইনপুট বা পণ্য বিক্রি", lKind: "লেনদেনের ধরন", optIn: "পণ্য ইনপুট (দোকানে এসেছে)", optOut: "পণ্য বিক্রি (দোকান থেকে গেছে)",
+    lProd: "পণ্য নির্বাচন", lBags: "বস্তার সংখ্যা", lKgs: "অতিরিক্ত কেজি", lCust: "বিক্রির কাস্টমার (বাকির খাতার জন্য)",
+    lPrice: "মোট বিক্রয় মূল্য (টাকা)", lPaid: "নগদ প্রাপ্তি / জমা (টাকা)", lDate: "তারিখ ও সময়", lNote: "বিবরণ / নোট (ঐচ্ছিক)",
+    phNote: "যেমন: চালান নম্বর বা মন্তব্য",
+    saveEntryBtn: "লেনদেন সংরক্ষণ করুন",
+    hNewProd: "নতুন পণ্য যোগ করুন", lPName: "পণ্যের নাম", lPCode: "পণ্যের কোড", lPWeight: "প্রতি বস্তায় কেজি", lPBags: "প্রাথমিক মজুদ (বস্তা)", lPKgs: "প্রাথমিক অতিরিক্ত কেজি", addProdBtn: "পণ্য সংরক্ষণ", hProdList: "পণ্যের তালিকা",
+    phPName: "যেমন: ব্রয়লার স্টার্টার", phPCode: "যেমন: F001",
+    hNewCust: "নতুন কাস্টমার যোগ করুন", lCName: "কাস্টমারের নাম", lCPhone: "মোবাইল নম্বর", lCAddr: "ঠিকানা", addCustBtn: "কাস্টমার সংরক্ষণ", lSearch: "কাস্টমার খুঁজুন (সিরিয়াল, নাম বা মোবাইল লিখে)", hCustList: "কাস্টমার তালিকা ও বাকির পরিমাণ",
+    phCName: "যেমন: মো: রহিম মিয়া", phCPhone: "যেমন: 017xxxxxxxx", phCAddr: "যেমন: বাজারপাড়া", phSearch: "🔍 সিরিয়াল, নাম বা মোবাইল নম্বর লিখে খুঁজুন...",
+    backCust: "← কাস্টমার তালিকায় ফিরে যান", hNewCustTx: "নতুন লেনদেন যোগ করুন (মাল নেওয়া বা টাকা জমা)", lCTxType: "লেনদেনের ধরন", optDueSale: "বাকিতে পণ্য / মাল ক্রয়", optCashColl: "নগদ টাকা জমা (পরিশোধ)", lCTxNote: "বিবরণ / নোট", lCTxAmt: "মালের মূল্য (টাকা)", lCTxPaid: "জমা / পরিশোধ (টাকা)", saveCustTxBtn: "লেনদেন সংরক্ষণ", hCustHist: "লেনদেনের ইতিহাস", printCustBtn: "খাতা প্রিন্ট / PDF সংরক্ষণ",
+    phCTxNote: "যেমন: ফিড বাবদ বা বাকি পরিশোধ",
+    hAllRec: "সব লেনদেনের রেকর্ড", csvBtn: "CSV ডাউনলোড",
+    hBackup: "ডাটা ব্যাকআপ ও রিস্টোর", pBackupDesc: "ফোন পরিবর্তনের আগে বা মাঝে মাঝে আপনার সব পণ্যের স্টক ও কাস্টমার খাতার ব্যাকআপ সেভ করে রাখুন।",
+    exportJsonBtn: "ব্যাকআপ সেভ করুন (JSON)", importJsonBtn: "ব্যাকআপ রিস্টোর করুন",
+    hRepTitle: "রাতের দৈনিক হিসাব", lRepDate: "তারিখ", makeRepBtn: "হিসাব দেখুন", printBtn: "প্রিন্ট / PDF সংরক্ষণ",
+    footer: "আপনার হিসাব এই ডিভাইসের ব্রাউজারেই সুরক্ষিত থাকবে",
+    noRecordToday: "আজ এখনো কোনো লেনদেন নেই।", noProd: "এখনো কোনো পণ্য যোগ করা হয়নি।", noCust: "কোনো কাস্টমার পাওয়া যায়নি।", noTx: "এই কাস্টমারের কোনো লেনদেন নেই।", noRec: "কোনো রেকর্ড নেই।"
+  },
+  en: {
+    title: "🐓 Feed Stock & Due Ledger",
+    sub: "Stock • Sales • Customer Ledger",
+    langBtn: "বাংলা",
+    tabs: ["Dashboard", "Input / Sales", "Products", "Customer Ledger", "Records", "Night Report"],
+    s1: "Total Stock", s2: "Today's Input", s3: "Today's Sales", s4: "Total Customer Due", s5: "Total Advance Deposit",
+    unitWt: "Bags + Kg", unitTaka: "BDT",
+    hLatest: "Latest Records Today", hStockTable: "Product-wise Stock",
+    hEntryTitle: "New Input or Product Sale", lKind: "Transaction Type", optIn: "Product Input (Stock In)", optOut: "Product Sale (Stock Out)",
+    lProd: "Select Product", lBags: "Number of Bags", lKgs: "Extra Kg", lCust: "Customer (Optional for Due)",
+    lPrice: "Total Price (BDT)", lPaid: "Cash Paid (BDT)", lDate: "Date & Time", lNote: "Note (Optional)",
+    phNote: "e.g., Invoice no. or remark",
+    saveEntryBtn: "Save Transaction",
+    hNewProd: "Add New Product", lPName: "Product Name", lPCode: "Product Code", lPWeight: "Kg Per Bag", lPBags: "Initial Bags", lPKgs: "Initial Extra Kg", addProdBtn: "Save Product", hProdList: "Product List",
+    phPName: "e.g., Broiler Starter", phPCode: "e.g., F001",
+    hNewCust: "Add New Customer", lCName: "Customer Name", lCPhone: "Mobile Number", lCAddr: "Address", addCustBtn: "Save Customer", lSearch: "Search Customer (Serial, Name, Phone)", hCustList: "Customer List & Due Amount",
+    phCName: "e.g., Md. Rahim Mia", phCPhone: "e.g., 017xxxxxxxx", phCAddr: "e.g., Bazarpara", phSearch: "🔍 Search by serial, name, or phone...",
+    backCust: "← Back to Customer List", hNewCustTx: "Add New Transaction (Purchase/Payment)", lCTxType: "Transaction Type", optDueSale: "Due Sale / Purchase", optCashColl: "Cash Payment Received", lCTxNote: "Description / Note", lCTxAmt: "Amount (BDT)", lCTxPaid: "Paid (BDT)", saveCustTxBtn: "Save Transaction", hCustHist: "Transaction History", printCustBtn: "Print / Save PDF",
+    phCTxNote: "e.g., Feed purchase or due payment",
+    hAllRec: "All Transaction Records", csvBtn: "Download CSV",
+    hBackup: "Data Backup & Restore", pBackupDesc: "Save a backup file regularly so you never lose your stock or customer ledger.",
+    exportJsonBtn: "Save Backup (JSON)", importJsonBtn: "Restore Backup",
+    hRepTitle: "Daily Night Report", lRepDate: "Date", makeRepBtn: "View Report", printBtn: "Print / Save PDF",
+    footer: "Your data is securely stored on this device",
+    noRecordToday: "No transactions today.", noProd: "No products added yet.", noCust: "No customers found.", noTx: "No transactions for this customer.", noRec: "No records found."
+  }
+};
+
+let currentLang = localStorage.getItem('feedAppLang') || 'bn';
+function t(key) { return translations[currentLang][key] || key; }
+
+let rawData = localStorage.getItem(storeKey);
+let db = rawData ? JSON.parse(rawData) : { products: [], tx: [], customers: [], customerTx: [], next: 1, cNext: 1, version: currentAppVersion };
+db.version = currentAppVersion;
+if (!db.products) db.products = [];
+if (!db.tx) db.tx = [];
+if (!db.customers) db.customers = [];
+if (!db.customerTx) db.customerTx = [];
+if (!db.next) db.next = 1;
+if (!db.cNext) db.cNext = db.customers.length + 1;
+
+db.customers.forEach((c, idx) => {
+  if (!c.serial) c.serial = `C-${String(idx + 1).padStart(3, '0')}`;
+});
+localStorage.setItem(storeKey, JSON.stringify(db));
+
+function save() {
+  localStorage.setItem(storeKey, JSON.stringify(db));
+  renderAll();
+}
+
+function bn(n) {
+  let num = Number(n || 0);
+  if (currentLang === 'en') return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  return num.toLocaleString('bn-BD', { maximumFractionDigits: 2 });
+}
+
+function dateLocal(d = new Date()) {
+  let x = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return x.toISOString().slice(0, 16);
+}
+function day(s) { return (s || '').slice(0, 10); }
+function product(id) { return db.products.find(p => p.id === id); }
+function stockKg(p) { return db.tx.filter(t => t.pid === p.id).reduce((a, t) => a + (t.kind === 'in' ? 1 : -1) * t.totalKg, 0); }
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function uuid() { return (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('id-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9)); }
+
+function qtyText(kg, p) {
+  let bags = Math.floor((kg + 1e-8) / p.weight), rem = kg - bags * p.weight;
+  if (currentLang === 'en') return `${bn(bags)} Bags${rem > 0.001 ? ' ' + bn(rem) + ' Kg' : ''} (${bn(kg)} Kg)`;
+  return `${bn(bags)} বস্তা${rem > 0.001 ? ' ' + bn(rem) + ' কেজি' : ''} (${bn(kg)} কেজি)`;
+}
+function totalQty(b, k, p) { return Math.max(0, Number(b) || 0) * p.weight + Math.max(0, Number(k) || 0); }
+
+function saveFileOut(filename, content, mimeType) {
+  let a = document.createElement('a');
+  let url = URL.createObjectURL(new Blob([content], { type: mimeType }));
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.panel').forEach(x => x.classList.toggle('active', x.id === name));
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
+  if (name === 'report') renderReport();
+  if (name === 'records') renderRecords();
+  if (name === 'customers') { activeCustomerId = null; $('searchCustomer').value = ''; renderCustomers(); }
+}
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+
+$('langToggleBtn').onclick = () => {
+  currentLang = currentLang === 'bn' ? 'en' : 'bn';
+  localStorage.setItem('feedAppLang', currentLang);
+  renderAll();
+};
+
+function updateTexts() {
+  $('tTitle').textContent = t('title');
+  $('tSub').textContent = t('sub');
+  $('langToggleBtn').textContent = t('langBtn');
+
+  let tKeys = t('tabs');
+  document.querySelectorAll('.tab').forEach((tab, i) => { if (tKeys[i]) tab.textContent = tKeys[i]; });
+
+  $('s1Title').textContent = t('s1');
+  $('s2Title').textContent = t('s2');
+  $('s3Title').textContent = t('s3');
+  $('s4Title').textContent = t('s4');
+  $('s5Title').textContent = t('s5');
+  document.querySelectorAll('.unit-wt').forEach(el => el.textContent = t('unitWt'));
+  $('uTaka').textContent = t('unitTaka');
+  $('hLatest').textContent = t('hLatest');
+  $('hStockTable').textContent = t('hStockTable');
+
+  $('hEntryTitle').textContent = t('hEntryTitle');
+  $('lKind').textContent = t('lKind');
+  $('optIn').textContent = t('optIn');
+  $('optOut').textContent = t('optOut');
+  $('lProd').textContent = t('lProd');
+  $('lBags').textContent = t('lBags');
+  $('lKgs').textContent = t('lKgs');
+  $('lCust').textContent = t('lCust');
+  $('lPrice').textContent = t('lPrice');
+  $('lPaid').textContent = t('lPaid');
+  $('lDate').textContent = t('lDate');
+  $('lNote').textContent = t('lNote');
+  $('note').placeholder = t('phNote');
+  $('saveEntry').textContent = t('saveEntryBtn');
+
+  $('hNewProd').textContent = t('hNewProd');
+  $('lPName').textContent = t('lPName'); $('pName').placeholder = t('phPName');
+  $('lPCode').textContent = t('lPCode'); $('pCode').placeholder = t('phPCode');
+  $('lPWeight').textContent = t('lPWeight');
+  $('lPBags').textContent = t('lPBags');
+  $('lPKgs').textContent = t('lPKgs');
+  $('addProduct').textContent = t('addProdBtn');
+  $('hProdList').textContent = t('hProdList');
+
+  $('hNewCust').textContent = t('hNewCust');
+  $('lCName').textContent = t('lCName'); $('cName').placeholder = t('phCName');
+  $('lCPhone').textContent = t('lCPhone'); $('cPhone').placeholder = t('phCPhone');
+  $('lCAddr').textContent = t('lCAddr'); $('cAddress').placeholder = t('phCAddr');
+  $('addCustomer').textContent = t('addCustBtn');
+  $('lSearch').textContent = t('lSearch'); $('searchCustomer').placeholder = t('phSearch');
+  $('hCustList').textContent = t('hCustList');
+
+  $('backToCustomers').textContent = t('backCust');
+  $('hNewCustTx').textContent = t('hNewCustTx');
+  $('lCTxType').textContent = t('lCTxType');
+  $('optDueSale').textContent = t('optDueSale');
+  $('optCashColl').textContent = t('optCashColl');
+  $('lCTxNote').textContent = t('lCTxNote'); $('cTxNote').placeholder = t('phCTxNote');
+  $('lCTxAmt').textContent = t('lCTxAmt');
+  $('lCTxPaid').textContent = t('lCTxPaid');
+  $('saveCustomerTx').textContent = t('saveCustTxBtn');
+  $('hCustHist').textContent = t('hCustHist');
+  $('printCustBtn').textContent = t('printCustBtn');
+
+  $('hAllRec').textContent = t('hAllRec');
+  $('csvBtn').textContent = t('csvBtn');
+  $('hBackup').textContent = t('hBackup');
+  $('pBackupDesc').textContent = t('pBackupDesc');
+  $('exportJsonBtn').textContent = t('exportJsonBtn');
+  $('importJsonBtn').textContent = t('importJsonBtn');
+
+  $('hRepTitle').textContent = t('hRepTitle');
+  $('lRepDate').textContent = t('lRepDate');
+  $('makeReport').textContent = t('makeRepBtn');
+  $('printBtn').textContent = t('printBtn');
+  $('footerText').textContent = t('footer');
+}
+
+function renderSelect() {
+  let old = $('prodSelect').value;
+  $('prodSelect').innerHTML = db.products.map(p => `<option value="${p.id}">${esc(p.name)} (${esc(p.code)}) — ${bn(p.weight)} ${currentLang === 'en' ? 'Kg/Bag' : 'কেজি/বস্তা'}</option>`).join('');
+  if (old && product(old)) $('prodSelect').value = old;
+
+  let cOld = $('txCustomer').value;
+  let noCustText = currentLang === 'en' ? "-- Without Customer / Cash Sale --" : "-- কাস্টমার ছাড়া / নগদ বিক্রি --";
+  let noNumText = currentLang === 'en' ? "No phone" : "নম্বর নেই";
+  $('txCustomer').innerHTML = `<option value="">${noCustText}</option>` + db.customers.map(c => `<option value="${c.id}">[${esc(c.serial)}] ${esc(c.name)} (${esc(c.phone || noNumText)})</option>`).join('');
+  if (cOld) $('txCustomer').value = cOld;
+  updateCalc();
+}
+
+function updateCalc() {
+  let p = product($('prodSelect').value);
+  let prefix = currentLang === 'en' ? 'Total Quantity:' : 'মোট পরিমাণ:';
+  let unitText = currentLang === 'en' ? 'Kg' : 'কেজি';
+  let promptText = currentLang === 'en' ? 'Please add a product first' : 'আগে একটি পণ্য যোগ করুন';
+  $('calc').textContent = p ? `${prefix} ${bn(totalQty($('bags').value, $('kgs').value, p))} ${unitText}` : promptText;
+}
+
+function toggleSaleSection() {
+  $('saleSection').style.display = $('kind').value === 'out' ? 'block' : 'none';
+}
+
+function toggleCTxFields() {
+  let isCash = $('cTxType').value === 'cash_collection';
+  $('cTxAmtWrap').style.display = isCash ? 'none' : 'block';
+  if (isCash) $('cTxAmount').value = '0';
+}
+
+$('bags').oninput = $('kgs').oninput = updateCalc;
+$('prodSelect').onchange = updateCalc;
+$('kind').onchange = toggleSaleSection;
+$('cTxType').onchange = toggleCTxFields;
+
+$('addProduct').onclick = () => {
+  let name = $('pName').value.trim(), code = $('pCode').value.trim() || `F${String(db.products.length + 1).padStart(3, '0')}`, weight = Number($('pWeight').value), b = Number($('pBags').value) || 0, k = Number($('pKgs').value) || 0;
+  if (!name || weight <= 0 || b < 0 || k < 0) return alert(currentLang === 'en' ? 'Please enter product name, correct weight and stock.' : 'পণ্যের নাম, সঠিক বস্তার ওজন ও মজুদ দিন।');
+  let p = { id: uuid(), name, code, weight };
+  db.products.push(p);
+  let initText = currentLang === 'en' ? "Initial Stock" : "প্রাথমিক মজুদ";
+  if (b * weight + k > 0) db.tx.push({ id: uuid(), serial: `IN-${String(db.next++).padStart(5, '0')}`, pid: p.id, kind: 'in', bags: b, kgs: k, totalKg: b * weight + k, date: dateLocal(), note: initText });
+  $('pName').value = $('pCode').value = ''; $('pBags').value = '0'; $('pKgs').value = '0';
+  save();
+  alert(currentLang === 'en' ? 'Product saved successfully.' : 'পণ্য সংরক্ষণ হয়েছে।');
+};
+
+$('saveEntry').onclick = () => {
+  let kind = $('kind').value, p = product($('prodSelect').value), b = Number($('bags').value) || 0, k = Number($('kgs').value) || 0, total = p ? totalQty(b, k, p) : 0;
+  if (!p) return alert(currentLang === 'en' ? 'Please add a product first.' : 'আগে পণ্য যোগ করুন।');
+  if (b < 0 || k < 0 || total <= 0) return alert(currentLang === 'en' ? 'Please enter correct quantity.' : 'সঠিক পরিমাণ দিন।');
+
+  if (kind === 'out' && total > stockKg(p) + 0.0001) {
+    let stockMsg = currentLang === 'en' ? `Insufficient stock. Current stock: ${qtyText(stockKg(p), p)}` : `পর্যাপ্ত মজুদ নেই। বর্তমান মজুদ ${qtyText(stockKg(p), p)}`;
+    return alert(stockMsg);
+  }
+
+  let dt = $('entryDate').value || dateLocal();
+  let serial = `${kind === 'in' ? 'IN' : 'OUT'}-${String(db.next++).padStart(5, '0')}`;
+  db.tx.push({ id: uuid(), serial, pid: p.id, kind, bags: b, kgs: k, totalKg: total, date: dt, note: $('note').value.trim() });
+
+  if (kind === 'out') {
+    let cid = $('txCustomer').value;
+    let tPrice = Number($('totalPrice').value) || 0;
+    let paid = Number($('paidAmount').value) || 0;
+    if (cid && (tPrice > 0 || paid > 0)) {
+      let descText = currentLang === 'en' ? `Sale: ${p.name} (${bn(b)} Bags + ${bn(k)} Kg)` : `বিক্রি: ${p.name} (${bn(b)} বস্তা + ${bn(k)} কেজি)`;
+      db.customerTx.push({ id: uuid(), cid, date: dt, desc: descText, amount: tPrice, paid });
+    }
+  }
+
+  $('bags').value = '0'; $('kgs').value = '0'; $('note').value = ''; $('totalPrice').value = '0'; $('paidAmount').value = '0'; $('entryDate').value = dateLocal();
+  save();
+  alert(currentLang === 'en' ? 'Transaction saved successfully.' : 'লেনদেন সফলভাবে সংরক্ষণ করা হয়েছে।');
+};
+
+let activeCustomerId = null;
+$('addCustomer').onclick = () => {
+  let name = $('cName').value.trim(), phone = $('cPhone').value.trim(), address = $('cAddress').value.trim();
+  if (!name) return alert(currentLang === 'en' ? 'Please enter customer name.' : 'কাস্টমারের নাম দিন।');
+  let serial = `C-${String(db.cNext++).padStart(3, '0')}`;
+  db.customers.push({ id: uuid(), serial, name, phone, address });
+  $('cName').value = $('cPhone').value = $('cAddress').value = '';
+  save();
+  alert(currentLang === 'en' ? `Customer added. Serial: ${serial}` : `কাস্টমার যোগ করা হয়েছে। সিরিয়াল নম্বর: ${serial}`);
+};
+
+function getCustomerBalance(cid) {
+  return db.customerTx.filter(t => t.cid === cid).reduce((a, t) => a + (t.amount - t.paid), 0);
+}
+
+function renderCustomers() {
+  $('customerListView').classList.remove('hide');
+  $('customerDetailView').classList.add('hide');
+
+  let searchTxt = $('searchCustomer').value.toLowerCase().trim();
+  let filteredCustomers = db.customers.filter(c => {
+    return (c.serial || '').toLowerCase().includes(searchTxt) ||
+      (c.name || '').toLowerCase().includes(searchTxt) ||
+      (c.phone || '').includes(searchTxt);
+  });
+
+  let thSerial = currentLang === 'en' ? 'Serial' : 'সিরিয়াল';
+  let thName = currentLang === 'en' ? 'Name' : 'নাম';
+  let thPhone = currentLang === 'en' ? 'Mobile' : 'মোবাইল';
+  let thAddr = currentLang === 'en' ? 'Address' : 'ঠিকানা';
+  let thStatus = currentLang === 'en' ? 'Current Status' : 'বর্তমান অবস্থা';
+
+  $('customerTable').innerHTML = filteredCustomers.length ? `<table><thead><tr><th>${thSerial}</th><th>${thName}</th><th>${thPhone}</th><th>${thAddr}</th><th>${thStatus}</th></tr></thead><tbody>${filteredCustomers.map(c => {
+    let bal = getCustomerBalance(c.id);
+    let dueText = currentLang === 'en' ? `Due: ৳${bn(bal)}` : `বাকি: ৳${bn(bal)}`;
+    let advText = currentLang === 'en' ? `Advance: ৳${bn(Math.abs(bal))}` : `অগ্রিম / অতিরিক্ত: ৳${bn(Math.abs(bal))}`;
+    let paidText = currentLang === 'en' ? `Paid (0)` : `পরিশোধিত (০)`;
+    let balText = bal > 0 ? `<span style="color:var(--red)">${dueText}</span>` : bal < 0 ? `<span style="color:var(--blue)">${advText}</span>` : `<span class="muted">${paidText}</span>`;
+    return `<tr style="cursor:pointer" onclick="openCustomer('${c.id}')"><td><span class="serial">${esc(c.serial)}</span></td><td><span class="cname-bold">${esc(c.name)}</span></td><td><b>${esc(c.phone || '—')}</b></td><td>${esc(c.address || '—')}</td><td><b>${balText}</b></td></tr>`;
+  }).join('')}</tbody></table>` : `<div class="empty">${t('noCust')}</div>`;
+}
+
+$('searchCustomer').oninput = renderCustomers;
+
+window.openCustomer = id => {
+  activeCustomerId = id;
+  let c = db.customers.find(x => x.id === id);
+  if (!c) { activeCustomerId = null; renderCustomers(); return; }
+  $('customerListView').classList.add('hide');
+  $('customerDetailView').classList.remove('hide');
+
+  let txs = db.customerTx.filter(t => t.cid === id).sort((a, b) => a.date.localeCompare(b.date));
+  let runningBal = 0;
+
+  let phoneLbl = currentLang === 'en' ? 'Mobile' : 'মোবাইল';
+  let addrLbl = currentLang === 'en' ? 'Address' : 'ঠিকানা';
+  let noneText = currentLang === 'en' ? 'None' : 'নেই';
+  let editBtnText = currentLang === 'en' ? 'Edit Info' : 'তথ্য এডিট';
+  let delBtnText = currentLang === 'en' ? 'Delete' : 'ডিলিট';
+
+  $('customerProfileCard').innerHTML = `<div class="serial" style="margin-bottom:4px">Serial: ${esc(c.serial)}</div><h2 style="margin:0 0 6px 0;font-size:21px;font-weight:800" class="cname-bold">${esc(c.name)}</h2><div class="muted">${phoneLbl}: <b style="color:var(--text)">${esc(c.phone || noneText)}</b> • ${addrLbl}: ${esc(c.address || noneText)}</div><div class="no-print" style="margin-top:12px;display:flex;gap:8px;"><button class="btn-light" onclick="editCustomer('${c.id}')">${editBtnText}</button><button class="btn-red" onclick="deleteCustomer('${c.id}')">${delBtnText}</button></div>`;
+
+  let thDate = currentLang === 'en' ? 'Date' : 'তারিখ';
+  let thDesc = currentLang === 'en' ? 'Description' : 'বিবরণ';
+  let thAmt = currentLang === 'en' ? 'Price' : 'মূল্য';
+  let thPaid = currentLang === 'en' ? 'Paid' : 'জমা';
+  let thRem = currentLang === 'en' ? 'Balance' : 'অবশিষ্ট বাকি';
+  let thAct = currentLang === 'en' ? 'Action' : 'কাজ';
+  let delTxLbl = currentLang === 'en' ? 'Del' : 'মুছুন';
+
+  $('customerTxTable').innerHTML = txs.length ? `<table><thead><tr><th>${thDate}</th><th>${thDesc}</th><th>${thAmt}</th><th>${thPaid}</th><th>${thRem}</th><th class="no-print">${thAct}</th></tr></thead><tbody>${txs.map(tx => {
+    runningBal += (tx.amount - tx.paid);
+    let rDue = currentLang === 'en' ? `৳${bn(runningBal)} Due` : `৳${bn(runningBal)} বাকি`;
+    let rAdv = currentLang === 'en' ? `৳${bn(Math.abs(runningBal))} Adv` : `৳${bn(Math.abs(runningBal))} অগ্রিম`;
+    let rZero = `৳${bn(0)}`;
+    return `<tr><td>${esc(tx.date.replace('T', ' '))}</td><td>${esc(tx.desc)}</td><td>৳${bn(tx.amount)}</td><td>৳${bn(tx.paid)}</td><td><b>${runningBal > 0 ? `<span style="color:var(--red)">${rDue}</span>` : runningBal < 0 ? `<span style="color:var(--blue)">${rAdv}</span>` : rZero}</b></td><td class="no-print"><button class="btn-red btn-sm" onclick="deleteCustomerTx('${tx.id}')">${delTxLbl}</button></td></tr>`;
+  }).join('')}</tbody></table>` : `<div class="empty">${t('noTx')}</div>`;
+};
+
+window.deleteCustomerTx = txId => {
+  let msg = currentLang === 'en' ? 'Delete this customer transaction?' : 'এই লেনদেনটি মুছে ফেলতে চান?';
+  if (!confirm(msg)) return;
+  db.customerTx = db.customerTx.filter(t => t.id !== txId);
+  save();
+};
+
+window.editCustomer = id => {
+  let c = db.customers.find(x => x.id === id);
+  if (!c) return;
+  let name = prompt(currentLang === 'en' ? 'Customer Name' : 'কাস্টমারের নাম', c.name); if (name === null) return;
+  let phone = prompt(currentLang === 'en' ? 'Mobile Number' : 'মোবাইল নম্বর', c.phone || ''); if (phone === null) return;
+  let address = prompt(currentLang === 'en' ? 'Address' : 'ঠিকানা', c.address || ''); if (address === null) return;
+  if (!name.trim()) return alert(currentLang === 'en' ? 'Customer name is required.' : 'কাস্টমারের নাম আবশ্যক।');
+  c.name = name.trim(); c.phone = phone.trim(); c.address = address.trim();
+  save();
+  alert(currentLang === 'en' ? 'Customer info updated successfully.' : 'কাস্টমারের তথ্য আপডেট করা হয়েছে।');
+};
+
+window.deleteCustomer = id => {
+  let confirmMsg = currentLang === 'en' ? 'Do you want to delete this customer and all ledger history?' : 'এই কাস্টমার এবং তার সমস্ত খাতা চিরতরে মুছে ফেলতে চান?';
+  if (!confirm(confirmMsg)) return;
+  db.customers = db.customers.filter(c => c.id !== id);
+  db.customerTx = db.customerTx.filter(t => t.cid !== id);
+  activeCustomerId = null;
+  save();
+  alert(currentLang === 'en' ? 'Customer deleted.' : 'কাস্টমার ডিলিট করা হয়েছে।');
+};
+
+$('backToCustomers').onclick = () => { activeCustomerId = null; renderCustomers(); };
+$('printCustBtn').onclick = () => window.print();
+
+$('saveCustomerTx').onclick = () => {
+  if (!activeCustomerId) return;
+  let defaultDesc = currentLang === 'en' ? ($('cTxType').value === 'due_sale' ? 'Due Purchase' : 'Cash Payment') : ($('cTxType').value === 'due_sale' ? 'বাকিতে মাল ক্রয়' : 'নগদ টাকা জমা');
+  let desc = $('cTxNote').value.trim() || defaultDesc;
+  let amount = $('cTxType').value === 'cash_collection' ? 0 : (Number($('cTxAmount').value) || 0);
+  let paid = Number($('cTxPaid').value) || 0;
+  if (amount <= 0 && paid <= 0) return alert(currentLang === 'en' ? 'Please enter correct amount or payment.' : 'সঠিক পরিমাণ বা জমা দিন।');
+
+  db.customerTx.push({ id: uuid(), cid: activeCustomerId, date: dateLocal(), desc, amount, paid });
+  $('cTxNote').value = ''; $('cTxAmount').value = '0'; $('cTxPaid').value = '0';
+  save();
+  alert(currentLang === 'en' ? 'Transaction saved.' : 'লেনদেন সংরক্ষিত হয়েছে।');
+};
+
+function renderHome() {
+  let today = day(dateLocal()), tx = db.tx.filter(t => day(t.date) === today);
+  let ins = tx.filter(t => t.kind === 'in').reduce((a, t) => a + t.totalKg, 0);
+  let outs = tx.filter(t => t.kind === 'out').reduce((a, t) => a + t.totalKg, 0);
+  let total = db.products.reduce((a, p) => a + stockKg(p), 0);
+
+  let totalDue = 0, totalAdvance = 0, advCustomerCount = 0;
+  db.customers.forEach(c => {
+    let b = getCustomerBalance(c.id);
+    if (b > 0) totalDue += b;
+    else if (b < 0) { totalAdvance += Math.abs(b); advCustomerCount++; }
+  });
+
+  let unitKg = currentLang === 'en' ? ' Kg' : ' কেজি';
+  let custCountText = currentLang === 'en' ? `${bn(advCustomerCount)} customers` : `${bn(advCustomerCount)} জন কাস্টমার`;
+
+  $('sStock').textContent = bn(total) + unitKg;
+  $('sIn').textContent = bn(ins) + unitKg;
+  $('sOut').textContent = bn(outs) + unitKg;
+  $('sDue').textContent = `৳${bn(totalDue)}`;
+  $('sAdv').textContent = `৳${bn(totalAdvance)}`;
+  $('sAdvCount').textContent = custCountText;
+
+  let latest = [...tx].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
+  $('latest').innerHTML = latest.length ? latest.map(txItem => {
+    let typeName = txItem.kind === 'in' ? (currentLang === 'en' ? 'Input' : 'ইনপুট') : (currentLang === 'en' ? 'Sale' : 'বিক্রি');
+    return `<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b class="serial">${esc(txItem.serial)}</b><div>${esc(product(txItem.pid)?.name || (currentLang === 'en' ? 'Product' : 'পণ্য'))}</div><small class="muted">${esc(txItem.date.replace('T', ' '))}</small></div><div style="text-align:right"><span class="pill ${txItem.kind}">${typeName}</span><b style="display:block">${bn(txItem.totalKg)}${unitKg}</b></div></div>`;
+  }).join('') : `<div class="empty">${t('noRecordToday')}</div>`;
+
+  let thCode = currentLang === 'en' ? 'Code' : 'কোড';
+  let thProd = currentLang === 'en' ? 'Product' : 'পণ্য';
+  let thStock = currentLang === 'en' ? 'Stock' : 'মজুদ';
+
+  $('stockTable').innerHTML = db.products.length ? `<table><thead><tr><th>${thCode}</th><th>${thProd}</th><th>${thStock}</th></tr></thead><tbody>${db.products.map(p => `<tr><td>${esc(p.code)}</td><td>${esc(p.name)}<small class="muted" style="display:block">${bn(p.weight)} ${currentLang === 'en' ? 'Kg/Bag' : 'কেজি/বস্তা'}</small></td><td><b>${qtyText(stockKg(p), p)}</b></td></tr>`).join('')}</tbody></table>` : `<div class="empty">${t('noProd')}</div>`;
+}
+
+function renderProducts() {
+  let editBtnTxt = currentLang === 'en' ? 'Edit' : 'এডিট';
+  let delBtnTxt = currentLang === 'en' ? 'Delete' : 'ডিলিট';
+  $('productList').innerHTML = db.products.length ? db.products.map(p => `<div class="card"><div class="row"><div><b class="cname-bold">${esc(p.name)}</b><div class="muted">${esc(p.code)} • ${bn(p.weight)} ${currentLang === 'en' ? 'Kg/Bag' : 'কেজি/বস্তা'}</div><b style="color:var(--green)">${qtyText(stockKg(p), p)}</b></div><div style="display:flex;gap:6px;flex:0 0 auto;"><button class="btn-light" onclick="editProduct('${p.id}')">${editBtnTxt}</button><button class="btn-red" onclick="deleteProduct('${p.id}')">${delBtnTxt}</button></div></div></div>`).join('') : `<div class="card empty">${t('noProd')}</div>`;
+}
+
+window.editProduct = id => {
+  let p = product(id); if (!p) return;
+  let name = prompt(currentLang === 'en' ? 'Product Name' : 'পণ্যের নাম', p.name); if (name === null) return;
+  let code = prompt(currentLang === 'en' ? 'Product Code' : 'পণ্যের কোড', p.code); if (code === null) return;
+  let wInput = prompt(currentLang === 'en' ? 'Kg per Bag' : 'প্রতি বস্তার ওজন (কেজি)', p.weight); if (wInput === null) return;
+  let w = Number(wInput);
+  if (!name.trim() || !code.trim() || !Number.isFinite(w) || w <= 0) return alert(currentLang === 'en' ? 'Invalid information.' : 'তথ্য সঠিক নয়।');
+  p.name = name.trim(); p.code = code.trim(); p.weight = w;
+  save();
+  alert(currentLang === 'en' ? 'Product info updated.' : 'পণ্যের তথ্য আপডেট করা হয়েছে।');
+};
+
+window.deleteProduct = id => {
+  let confirmMsg = currentLang === 'en' ? 'Do you want to delete this product?' : 'এই পণ্যটি ডিলিট করতে চান?';
+  if (!confirm(confirmMsg)) return;
+  db.products = db.products.filter(p => p.id !== id);
+  save();
+};
+
+function renderRecords() {
+  let arr = [...db.tx].sort((a, b) => b.date.localeCompare(a.date));
+  let thSer = currentLang === 'en' ? 'Serial' : 'সিরিয়াল';
+  let thDT = currentLang === 'en' ? 'Date/Time' : 'তারিখ/সময়';
+  let thP = currentLang === 'en' ? 'Product' : 'পণ্য';
+  let thT = currentLang === 'en' ? 'Type' : 'ধরন';
+  let thQ = currentLang === 'en' ? 'Quantity' : 'পরিমাণ';
+  let thAct = currentLang === 'en' ? 'Action' : 'কাজ';
+  let unitKg = currentLang === 'en' ? ' Kg' : ' কেজি';
+  let bagText = currentLang === 'en' ? ' Bags + ' : ' বস্তা + ';
+
+  $('recordTable').innerHTML = arr.length ? `<table><thead><tr><th>${thSer}</th><th>${thDT}</th><th>${thP}</th><th>${thT}</th><th>${thQ}</th><th>${thAct}</th></tr></thead><tbody>${arr.map(txItem => {
+    let p = product(txItem.pid);
+    let typeName = txItem.kind === 'in' ? (currentLang === 'en' ? 'Input' : 'ইনপুট') : (currentLang === 'en' ? 'Sale' : 'বিক্রি');
+    let delBtn = currentLang === 'en' ? 'Delete' : 'মুছুন';
+    return `<tr><td><b>${esc(txItem.serial)}</b></td><td>${esc(txItem.date.replace('T', ' '))}</td><td>${esc(p?.name || '—')}</td><td><span class="pill ${txItem.kind}">${typeName}</span></td><td>${bn(txItem.bags)}${bagText}${bn(txItem.kgs)}${unitKg}<br>${bn(txItem.totalKg)}${unitKg}</td><td><button class="btn-red btn-sm" onclick="deleteTx('${txItem.id}')">${delBtn}</button></td></tr>`;
+  }).join('')}</tbody></table>` : `<div class="empty">${t('noRec')}</div>`;
+}
+
+window.deleteTx = id => {
+  let confirmMsg = currentLang === 'en' ? 'Delete this record?' : 'এই রেকর্ড মুছবেন?';
+  if (!confirm(confirmMsg)) return;
+  db.tx = db.tx.filter(x => x.id !== id);
+  save();
+};
+
+function renderReport() {
+  let d = $('reportDate').value || day(dateLocal()); $('reportDate').value = d;
+  let tx = db.tx.filter(t => day(t.date) === d);
+  let ins = tx.filter(t => t.kind === 'in').reduce((a, t) => a + t.totalKg, 0);
+  let outs = tx.filter(t => t.kind === 'out').reduce((a, t) => a + t.totalKg, 0);
+
+  let totalDue = 0, totalAdvance = 0;
+  db.customers.forEach(c => {
+    let b = getCustomerBalance(c.id);
+    if (b > 0) totalDue += b;
+    else if (b < 0) totalAdvance += Math.abs(b);
+  });
+
+  let unitKg = currentLang === 'en' ? ' Kg' : ' কেজি';
+  let r1 = currentLang === 'en' ? 'Total Input Today' : 'আজ মোট ইনপুট';
+  let r2 = currentLang === 'en' ? 'Total Sales Today' : 'আজ মোট বিক্রি';
+  let r3 = currentLang === 'en' ? 'Total Customer Due' : 'বর্তমান মোট কাস্টমার বাকি';
+  let r4 = currentLang === 'en' ? 'Total Advance Deposit' : 'বর্তমান মোট অগ্রিম জমা';
+  let r5 = currentLang === 'en' ? `${d} — Product-wise Night Stock` : `${d} — পণ্যভিত্তিক রাতের মজুদ`;
+  let thP = currentLang === 'en' ? 'Product' : 'পণ্য';
+  let thIn = currentLang === 'en' ? "Today's Input" : 'দিনের ইনপুট';
+  let thOut = currentLang === 'en' ? "Today's Sales" : 'দিনের বিক্রি';
+  let thStk = currentLang === 'en' ? 'Current Stock' : 'বর্তমান মজুদ';
+
+  $('reportResult').innerHTML = `
+    <div class="grid">
+      <div class="stat"><small>${r1}</small><strong>${bn(ins)}${unitKg}</strong></div>
+      <div class="stat"><small>${r2}</small><strong>${bn(outs)}${unitKg}</strong></div>
+      <div class="stat"><small>${r3}</small><strong style="color:var(--red)">৳${bn(totalDue)}</strong></div>
+      <div class="stat"><small>${r4}</small><strong style="color:var(--blue)">৳${bn(totalAdvance)}</strong></div>
+    </div>
+    <h2>${r5}</h2>
+    <div class="card tablewrap">
+      <table>
+        <thead><tr><th>${thP}</th><th>${thIn}</th><th>${thOut}</th><th>${thStk}</th></tr></thead>
+        <tbody>${db.products.map(p => {
+          let a = tx.filter(t => t.pid === p.id && t.kind === 'in').reduce((s, t) => s + t.totalKg, 0);
+          let b = tx.filter(t => t.pid === p.id && t.kind === 'out').reduce((s, t) => s + t.totalKg, 0);
+          return `<tr><td>${esc(p.name)}<small class="muted" style="display:block">${esc(p.code)}</small></td><td>${qtyText(a, p)}</td><td>${qtyText(b, p)}</td><td><b>${qtyText(stockKg(p), p)}</b></td></tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+}
+$('makeReport').onclick = renderReport;
+$('printBtn').onclick = () => window.print();
+
+$('csvBtn').onclick = () => {
+  let rows = [['Serial', 'DateTime', 'Product', 'Code', 'Type', 'Bags', 'ExtraKg', 'TotalKg', 'Note'], ...db.tx.map(t => { let p = product(t.pid); return [t.serial, t.date, p?.name || '', p?.code || '', t.kind, t.bags, t.kgs, t.totalKg, t.note || '']; })];
+  let csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
+  saveFileOut(`feed-stock-${day(dateLocal())}.csv`, csv, 'text/csv;charset=utf-8');
+};
+
+$('exportJsonBtn').onclick = () => {
+  saveFileOut(`feed-backup-${day(dateLocal())}.json`, JSON.stringify(db, null, 2), 'application/json');
+};
+
+$('importJsonBtn').onclick = () => $('importFile').click();
+$('importFile').onchange = e => {
+  let file = e.target.files[0];
+  if (!file) return;
+  let reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      let data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data.products) || !Array.isArray(data.tx)) throw new Error('Invalid');
+      let msg = currentLang === 'en' ? 'Restore backup? Current data will be replaced.' : 'ব্যাকআপ রিস্টোর করবেন? বর্তমান ডাটা পরিবর্তন হয়ে ব্যাকআপের ডাটা বসে যাবে।';
+      if (!confirm(msg)) return;
+      db = {
+        products: data.products || [],
+        tx: data.tx || [],
+        customers: data.customers || [],
+        customerTx: data.customerTx || [],
+        next: data.next || 1,
+        cNext: data.cNext || (data.customers ? data.customers.length + 1 : 1),
+        version: currentAppVersion
+      };
+      save();
+      alert(currentLang === 'en' ? 'Backup restored successfully!' : 'ব্যাকআপ সফলভাবে রিস্টোর হয়েছে!');
+    } catch (err) {
+      alert(currentLang === 'en' ? 'Invalid backup file.' : 'সঠিক ব্যাকআপ ফাইল নয়।');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+};
+
+function renderAll() {
+  updateTexts();
+  renderSelect();
+  toggleSaleSection();
+  toggleCTxFields();
+  renderHome();
+  renderProducts();
+  renderRecords();
+  if (activeCustomerId) openCustomer(activeCustomerId);
+  else renderCustomers();
+}
+
+$('entryDate').value = dateLocal();
+$('reportDate').value = day(dateLocal());
+renderAll();
+</script>
+</body>
+</html>
